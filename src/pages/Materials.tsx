@@ -206,11 +206,13 @@ export default function Materials() {
                 value={formData.unit}
                 onChange={e => setFormData({...formData, unit: e.target.value as any})}
               >
-                <option value="kg">Quilograma (kg)</option>
-                <option value="g">Grama (g)</option>
-                <option value="l">Litro (l)</option>
-                <option value="ml">Mililitro (ml)</option>
-                <option value="un">Unidade (un)</option>
+                <option key="kg" value="kg">Quilograma (kg)</option>
+                <option key="g" value="g">Grama (g)</option>
+                <option key="l" value="l">Litro (l)</option>
+                <option key="ml" value="ml">Mililitro (ml)</option>
+                <option key="m" value="m">Metro (m)</option>
+                <option key="cm" value="cm">Centímetro (cm)</option>
+                <option key="un" value="un">Unidade (un)</option>
               </select>
             </div>
           </div>

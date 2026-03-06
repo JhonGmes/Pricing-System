@@ -8,7 +8,7 @@ export interface Material {
   name: string;
   category: string;
   supplier?: string;
-  unit: 'kg' | 'g' | 'ml' | 'l' | 'un';
+  unit: 'kg' | 'g' | 'ml' | 'l' | 'un' | 'cm' | 'm';
   quantityBought: number;
   pricePaid: number;
   unitCost: number;
