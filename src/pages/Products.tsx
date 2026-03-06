@@ -41,6 +41,8 @@ export default function Products() {
     desiredMarginPercent: settings.defaultMarginPercent,
     fixedProfitAddon: settings.defaultFixedCost,
     finalPrice: 0,
+    stockQuantity: 0,
+    minStockLevel: 5,
   };
   const [formData, setFormData] = useState<Partial<Product>>(initialFormState);
   const [deductStock, setDeductStock] = useState(true);
@@ -110,6 +112,8 @@ export default function Products() {
       createdAt: formData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...formData as any,
+      stockQuantity: formData.stockQuantity || 0,
+      minStockLevel: formData.minStockLevel || 5,
       totalBatchCost: calculations.totalBatchCost,
       unitCost: calculations.unitCost,
     };
@@ -127,6 +131,27 @@ export default function Products() {
           const material = materials.find(m => m.id === pm.materialId);
           if (material) {
             // Deduct the quantity used for the batch
+            // If the user set an initial stock > 0, we might want to multiply by that?
+            // For now, let's assume deductStock means "I just made ONE batch" regardless of stockQuantity set?
+            // Or if stockQuantity is set to X, and batchSize is Y.
+            // If I say I have 5 units in stock. And batch size is 1.
+            // Did I make 5 batches? Or 1 batch of 5?
+            // Usually batchSize is "how many units I make at once".
+            // If I set stockQuantity to 5, and batchSize is 1. I made 5 batches.
+            // If I set stockQuantity to 5, and batchSize is 5. I made 1 batch.
+            
+            // The user request is simple: "automatically appear in Finished Products with the quantity".
+            // It doesn't explicitly say "deduct materials for that quantity".
+            // But logic dictates if I say I have stock, I used materials.
+            
+            // Current logic: deducts `pm.quantityUsed`.
+            // `pm.quantityUsed` is amount for ONE BATCH.
+            // So this logic assumes we made ONE BATCH.
+            
+            // If stockQuantity is provided, maybe we should check if it aligns with batchSize?
+            // Let's keep it simple: deductStock deducts ONE BATCH worth of materials.
+            // The user can manually adjust stock later if they made more.
+            
             const newStock = (material.stockQuantity || 0) - pm.quantityUsed;
             materialsToUpdate.push({
               ...material,
@@ -358,6 +383,24 @@ export default function Products() {
                     placeholder="Qtd de unidades"
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <DecimalInput
+                    label="Estoque Inicial"
+                    min={0}
+                    value={formData.stockQuantity || 0}
+                    onChange={val => setFormData({...formData, stockQuantity: val})}
+                    placeholder="Qtd em estoque"
+                  />
+                  <DecimalInput
+                    label="Estoque Mínimo"
+                    min={0}
+                    value={formData.minStockLevel || 5}
+                    onChange={val => setFormData({...formData, minStockLevel: val})}
+                    placeholder="Alerta de baixo estoque"
+                  />
+                </div>
+
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Descrição</label>
                   <textarea

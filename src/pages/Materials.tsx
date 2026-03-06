@@ -16,6 +16,8 @@ interface FormState {
   unit: 'kg' | 'g' | 'ml' | 'l' | 'un' | 'cm' | 'm';
   quantityBought: string;
   pricePaid: string;
+  stockQuantity: string;
+  minStockLevel: string;
 }
 
 export default function Materials() {
@@ -31,6 +33,8 @@ export default function Materials() {
     unit: 'kg',
     quantityBought: '',
     pricePaid: '',
+    stockQuantity: '',
+    minStockLevel: '5',
   };
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
@@ -41,6 +45,8 @@ export default function Materials() {
     const quantity = parseNumber(formData.quantityBought);
     const price = parseNumber(formData.pricePaid);
     const unitCost = price / (quantity || 1);
+    const stockQuantity = parseNumber(formData.stockQuantity);
+    const minStockLevel = parseNumber(formData.minStockLevel);
     
     if (isEditing && formData.id) {
       // Update existing
@@ -60,6 +66,8 @@ export default function Materials() {
           quantityBought: quantity,
           pricePaid: price,
           unitCost,
+          stockQuantity,
+          minStockLevel,
           history
         });
       }
@@ -76,6 +84,8 @@ export default function Materials() {
         quantityBought: quantity,
         pricePaid: price,
         unitCost,
+        stockQuantity: stockQuantity || quantity, // Default to quantity bought if not specified
+        minStockLevel: minStockLevel || 5,
       } as Material);
     }
     
@@ -97,6 +107,8 @@ export default function Materials() {
       unit: material.unit,
       quantityBought: material.quantityBought.toString().replace('.', ','),
       pricePaid: material.pricePaid.toString().replace('.', ','),
+      stockQuantity: (material.stockQuantity || 0).toString().replace('.', ','),
+      minStockLevel: (material.minStockLevel || 5).toString().replace('.', ','),
     });
     setIsEditing(true);
     setIsModalOpen(true);
@@ -273,6 +285,26 @@ export default function Materials() {
               value={formData.pricePaid}
               onChange={e => setFormData({...formData, pricePaid: e.target.value})}
               required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+            <Input
+              label="Estoque Atual"
+              type="text"
+              inputMode="decimal"
+              placeholder={formData.quantityBought || "0,00"}
+              value={formData.stockQuantity}
+              onChange={e => setFormData({...formData, stockQuantity: e.target.value})}
+              helperText="Se vazio, usará a Qtd. Compra"
+            />
+            <Input
+              label="Estoque Mínimo"
+              type="text"
+              inputMode="decimal"
+              placeholder="5,00"
+              value={formData.minStockLevel}
+              onChange={e => setFormData({...formData, minStockLevel: e.target.value})}
             />
           </div>
 
