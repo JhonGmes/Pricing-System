@@ -159,42 +159,44 @@ export default function Catalog() {
 
                 {/* Products Grid */}
                 <div 
-                  className="grid gap-x-8 gap-y-10 flex-1 content-start" 
+                  className="grid gap-6 flex-1 content-start" 
                   style={{ 
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    // Adjust rows based on items per page roughly, but let grid handle flow
+                    gridTemplateColumns: catalogSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+                    alignContent: 'start'
                   }}
                 >
                   {pageProducts.map((product) => (
-                    <div key={product.id} className="flex flex-col gap-3 break-inside-avoid">
-                      <div className="aspect-square w-full bg-white rounded-sm overflow-hidden shadow-sm relative">
-                        {product.images?.[0] ? (
-                          <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-black/5 text-gray-400">
-                            <ImageIcon size={32} />
-                          </div>
-                        )}
-                        {catalogSettings.showCode && product.code && (
-                           <span className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-mono rounded-sm shadow-sm">
-                             #{product.code}
-                           </span>
-                        )}
-                      </div>
-                      <div className="text-center space-y-1">
-                        <h3 className="font-serif font-bold text-xl leading-tight" style={{ color: catalogSettings.primaryColor }}>
-                          {product.name}
-                        </h3>
-                        {catalogSettings.showDescription && (
-                          <p className="text-xs opacity-70 line-clamp-2 px-2">
-                            {product.description}
-                          </p>
-                        )}
-                        {catalogSettings.showPrice && (
-                          <p className="font-bold text-lg mt-1">
-                            {formatCurrency(product.finalPrice)}
-                          </p>
-                        )}
+                    <div key={product.id} className="break-inside-avoid h-full">
+                      <div className="bg-white p-4 rounded-xl shadow-sm h-full flex flex-col">
+                        <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-3 relative">
+                          {product.images?.[0] ? (
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                              <ImageIcon size={32} />
+                            </div>
+                          )}
+                          {catalogSettings.showCode && product.code && (
+                             <span className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-mono rounded-sm shadow-sm text-gray-800">
+                               #{product.code}
+                             </span>
+                          )}
+                        </div>
+                        <div className="text-center space-y-1 mt-auto">
+                          <h3 className="font-serif font-bold text-lg leading-tight text-gray-900">
+                            {product.name}
+                          </h3>
+                          {catalogSettings.showDescription && (
+                            <p className="text-xs text-gray-500 line-clamp-2 px-1">
+                              {product.description}
+                            </p>
+                          )}
+                          {catalogSettings.showPrice && (
+                            <p className="font-bold text-lg mt-2 text-indigo-900">
+                              {formatCurrency(product.finalPrice)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

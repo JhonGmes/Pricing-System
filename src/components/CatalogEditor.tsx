@@ -234,18 +234,27 @@ export function CatalogEditor() {
 
                 {/* Grid */}
                 <div className="grid gap-6 flex-1 content-start" style={{ 
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gridTemplateRows: 'repeat(2, min-content)'
+                  gridTemplateColumns: localSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+                  alignContent: 'start'
                 }}>
-                  {[...Array(Math.min(4, localSettings.productsPerPage))].map((_, i) => (
-                    <div key={i} className="flex flex-col gap-2">
-                      <div className="aspect-square bg-black/5 w-full rounded-sm flex items-center justify-center">
-                        <ImageIcon className="opacity-20" size={40} />
+                  {[...Array(localSettings.productsPerPage)].map((_, i) => (
+                    <div key={i} className="bg-white p-3 rounded-xl shadow-sm flex flex-col h-full">
+                      <div className="aspect-square bg-gray-50 w-full rounded-lg flex items-center justify-center mb-3 relative">
+                        <ImageIcon className="opacity-20 text-gray-400" size={32} />
+                        {localSettings.showCode && (
+                           <span className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[8px] font-mono rounded-sm shadow-sm text-gray-800">
+                             #COD
+                           </span>
+                        )}
                       </div>
-                      <div className="text-center">
-                        <h3 className="font-serif font-bold text-lg">Produto Exemplo {i+1}</h3>
-                        <p className="text-xs opacity-70 mb-1">Descrição curta do produto...</p>
-                        {localSettings.showPrice && <p className="font-bold">R$ 49,90</p>}
+                      <div className="text-center mt-auto">
+                        <h3 className="font-serif font-bold text-sm leading-tight text-gray-900">Produto {i+1}</h3>
+                        {localSettings.showDescription && (
+                          <p className="text-[10px] text-gray-500 line-clamp-2 mt-1 px-1">Descrição curta do produto...</p>
+                        )}
+                        {localSettings.showPrice && (
+                          <p className="font-bold text-sm mt-2 text-indigo-900">R$ 49,90</p>
+                        )}
                       </div>
                     </div>
                   ))}
