@@ -3,18 +3,73 @@ import { useApp } from '../context/AppContext';
 import { Button } from '../components/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import { Input } from '../components/Input';
-import { Save, Upload, Settings as SettingsIcon, Palette, DollarSign } from 'lucide-react';
+import { Save, Upload, Settings as SettingsIcon, Palette, DollarSign, Database, Download, AlertCircle } from 'lucide-react';
 import { fileToBase64 } from '../utils';
 
 export default function Settings() {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, materials, indirectCosts, products, importData, isLoading, isSupabaseEnabled } = useApp();
   const [formData, setFormData] = useState(settings);
+
+  // Update formData when settings change (e.g. after initial load)
+  React.useEffect(() => {
+    setFormData(settings);
+  }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateSettings(formData);
     // Could add a toast here
     alert('Configurações salvas com sucesso!');
+  };
+
+  const handleExport = () => {
+    const data = {
+      materials,
+      indirectCosts,
+      products,
+      settings: formData,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `centelha-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm('ATENÇÃO: Importar um backup substituirá todos os dados atuais. Deseja continuar?')) {
+      e.target.value = ''; // Reset input
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      // Basic validation
+      if (!data.materials && !data.products) {
+        throw new Error('Arquivo de backup inválido');
+      }
+
+      importData(data);
+      setFormData(data.settings || settings);
+      alert('Dados restaurados com sucesso!');
+    } catch (err) {
+      console.error('Erro ao importar:', err);
+      alert('Erro ao ler o arquivo de backup. Verifique se é um arquivo válido.');
+    }
+    
+    e.target.value = ''; // Reset input
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +97,19 @@ export default function Settings() {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
+          {/* Connection Status Banner */}
+          {isSupabaseEnabled ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 text-emerald-800">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-sm font-medium">Conectado ao Supabase (Nuvem)</p>
+            </div>
+          ) : (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-3 text-gray-600">
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <p className="text-sm font-medium">Modo Offline (Dados salvos apenas neste dispositivo)</p>
+            </div>
+          )}
+
           <Card className="shadow-sm border-gray-200">
             <CardHeader className="border-b border-gray-50 pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -126,6 +194,64 @@ export default function Settings() {
               </div>
               <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm text-blue-800">
                 <p>Estes valores serão usados como ponto de partida ao criar novos produtos, mas você poderá ajustá-los individualmente.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-gray-200">
+            <CardHeader className="border-b border-gray-50 pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Database size={20} className="text-indigo-500" />
+                Gerenciamento de Dados
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Backup de Segurança</h4>
+                  <p className="text-sm text-gray-500">
+                    Baixe uma cópia de todos os seus dados (produtos, materiais, configurações) para o seu computador.
+                  </p>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleExport}
+                    className="w-full border-gray-300 hover:bg-gray-50 text-gray-700"
+                  >
+                    <Download size={16} className="mr-2" />
+                    Exportar Dados
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Restaurar Dados</h4>
+                  <p className="text-sm text-gray-500">
+                    Recupere seus dados a partir de um arquivo de backup anterior. Cuidado: isso substituirá os dados atuais.
+                  </p>
+                  <div className="relative">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full border-gray-300 hover:bg-gray-50 text-gray-700 pointer-events-none"
+                    >
+                      <Upload size={16} className="mr-2" />
+                      Importar Backup
+                    </Button>
+                    <input 
+                      type="file" 
+                      accept=".json"
+                      onChange={handleImport}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 text-sm text-amber-800 flex gap-2">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <p>
+                  <strong>Atenção:</strong> Seus dados são salvos automaticamente neste navegador. 
+                  Faça backups regulares para evitar perda de dados caso limpe o histórico ou troque de dispositivo.
+                </p>
               </div>
             </CardContent>
           </Card>

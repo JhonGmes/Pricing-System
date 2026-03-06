@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Product, ProductMaterial, ProductCost } from '../types';
-import { generateId, formatCurrency, fileToBase64, cn } from '../utils';
+import { generateId, formatCurrency, cn } from '../utils';
+import { storageService } from '../services/storageService';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
@@ -134,10 +135,11 @@ export default function Products() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       try {
-        const base64 = await fileToBase64(e.target.files[0]);
+        const file = e.target.files[0];
+        const imageUrl = await storageService.uploadImage(file, 'products');
         setFormData(prev => ({
           ...prev,
-          images: [...(prev.images || []), base64]
+          images: [...(prev.images || []), imageUrl]
         }));
       } catch (err) {
         console.error("Error uploading image", err);

@@ -1,8 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider, useApp } from './context/AppContext';
+import { AppProvider } from './context/AppContext';
 import { Layout } from './components/Layout';
-import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Materials from './pages/Materials';
 import IndirectCosts from './pages/IndirectCosts';
@@ -11,10 +10,7 @@ import Catalog from './pages/Catalog';
 import Settings from './pages/Settings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useApp();
-  if (!user.isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // Authentication check removed as requested
   return <Layout>{children}</Layout>;
 }
 
@@ -23,7 +19,7 @@ export default function App() {
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
           
           <Route path="/" element={
             <ProtectedRoute>
