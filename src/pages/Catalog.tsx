@@ -10,6 +10,7 @@ import { Product } from '../types';
 export default function Catalog() {
   const { products, settings } = useApp();
   const catalogRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const catalogSettings = settings.catalog || {
     coverTitle: settings.brandName,
     coverSubtitle: settings.subtitle,
@@ -39,20 +40,28 @@ export default function Catalog() {
     window.print();
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!catalogRef.current) return;
     
-    const element = catalogRef.current;
-    const opt = {
-      margin: 0,
-      filename: `Catalogo-${settings.brandName.replace(/\s+/g, '-')}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    };
+    setIsGeneratingPDF(true);
+    try {
+      const element = catalogRef.current;
+      const opt = {
+        margin: 0,
+        filename: `Catalogo-${settings.brandName.replace(/\s+/g, '-')}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
 
-    html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Erro ao gerar PDF. Tente novamente.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   // Helper to chunk array
@@ -72,8 +81,9 @@ export default function Catalog() {
           <Button variant="outline" onClick={handlePrint}>
             <Printer size={20} className="mr-2" /> Imprimir
           </Button>
-          <Button onClick={handleDownloadPDF}>
-            <Download size={20} className="mr-2" /> Baixar PDF
+          <Button onClick={handleDownloadPDF} disabled={isGeneratingPDF}>
+            <Download size={20} className="mr-2" /> 
+            {isGeneratingPDF ? 'Gerando PDF...' : 'Baixar PDF'}
           </Button>
         </div>
       </div>

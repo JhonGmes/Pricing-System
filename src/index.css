@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  body {
+    background: white;
+  }
+
+  /* Hide everything by default */
+  body > * {
+    display: none;
+  }
+
+  /* Only show the root app */
+  #root {
+    display: block;
+  }
+
+  /* Reset layout containers for print */
+  .min-h-screen, 
+  .h-screen, 
+  .flex, 
+  .flex-col, 
+  .overflow-hidden,
+  .overflow-y-auto {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  /* Hide sidebar and header explicitly (redundant but safe) */
+  aside, header {
+    display: none !important;
+  }
+
+  /* Reset main content padding and background */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Reset inner container */
+  main > div {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

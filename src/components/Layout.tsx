@@ -17,7 +17,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 lg:hidden shrink-0">
+        <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 lg:hidden shrink-0 print:hidden">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(true)} className="-ml-2">
               <Menu size={20} />
