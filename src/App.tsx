@@ -8,6 +8,7 @@ import IndirectCosts from './pages/IndirectCosts';
 import Products from './pages/Products';
 import Catalog from './pages/Catalog';
 import Settings from './pages/Settings';
+import Categories from './pages/Categories';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Authentication check removed as requested
@@ -42,6 +43,12 @@ export default function App() {
           <Route path="/products" element={
             <ProtectedRoute>
               <Products />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/categories" element={
+            <ProtectedRoute>
+              <Categories />
             </ProtectedRoute>
           } />
           

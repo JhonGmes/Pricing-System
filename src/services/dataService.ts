@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { Material, IndirectCost, Product, AppSettings, User } from '../types';
+import { Material, IndirectCost, Product, AppSettings, User, Category } from '../types';
 import { storage } from './storage';
 
 // Helper to check if we should use Supabase (Configured AND Authenticated)
@@ -10,6 +10,67 @@ const shouldUseSupabase = async () => {
 };
 
 export const dataService = {
+  async getCategories(): Promise<Category[]> {
+    if (await shouldUseSupabase()) {
+      const { data, error } = await supabase!.from('categories').select('*');
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+      }
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name
+      }));
+    }
+    return storage.getCategories();
+  },
+
+  async addCategory(category: Category, allCategories: Category[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('categories').insert([{
+        id: category.id,
+        name: category.name
+      }]);
+      if (error) console.error('Error adding category:', error);
+    } else {
+      storage.saveCategories(allCategories);
+    }
+  },
+
+  async updateCategory(category: Category, allCategories: Category[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('categories').update({
+        name: category.name
+      }).eq('id', category.id);
+      if (error) console.error('Error updating category:', error);
+    } else {
+      storage.saveCategories(allCategories);
+    }
+  },
+
+  async deleteCategory(id: string, allCategories: Category[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('categories').delete().eq('id', id);
+      if (error) console.error('Error deleting category:', error);
+    } else {
+      storage.saveCategories(allCategories);
+    }
+  },
+
+  async saveCategories(categories: Category[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('categories').upsert(
+        categories.map(c => ({
+          id: c.id,
+          name: c.name
+        }))
+      );
+      if (error) console.error('Error saving categories:', error);
+    } else {
+      storage.saveCategories(categories);
+    }
+  },
+
   async getMaterials(): Promise<Material[]> {
     if (await shouldUseSupabase()) {
       const { data, error } = await supabase!.from('materials').select('*');

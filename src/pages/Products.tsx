@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
-  const { products, materials, indirectCosts, addProduct, updateProduct, deleteProduct, settings } = useApp();
+  const { products, materials, indirectCosts, addProduct, updateProduct, deleteProduct, settings, categories: appCategories } = useApp();
   const [view, setView] = useState<'list' | 'form'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -189,9 +189,12 @@ export default function Products() {
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = new Set(products.map(p => p.category).filter(Boolean));
+    const cats = new Set([
+      ...products.map(p => p.category).filter(Boolean),
+      ...appCategories.map(c => c.name)
+    ]);
     return ['all', ...Array.from(cats)];
-  }, [products]);
+  }, [products, appCategories]);
 
   if (view === 'form') {
     return (
@@ -290,16 +293,22 @@ export default function Products() {
                   placeholder="Ex: Vela Aromática Lavanda"
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Categoria"
-                    value={formData.category}
-                    onChange={e => setFormData({...formData, category: e.target.value})}
-                    placeholder="Ex: Velas"
-                    list="categories"
-                  />
-                  <datalist id="categories">
-                    {categories.filter(c => c !== 'all').map(c => <option key={c} value={c} />)}
-                  </datalist>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-gray-700">Categoria</label>
+                    <select
+                      className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      value={formData.category}
+                      onChange={e => setFormData({...formData, category: e.target.value})}
+                    >
+                      <option value="">Selecione...</option>
+                      {appCategories.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
+                      {formData.category && !appCategories.find(c => c.name === formData.category) && (
+                        <option value={formData.category}>{formData.category} (Legado)</option>
+                      )}
+                    </select>
+                  </div>
                   <Input
                     label="Rendimento (Lote)"
                     type="number"

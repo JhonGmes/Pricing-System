@@ -6,9 +6,18 @@ const STORAGE_KEYS = {
   PRODUCTS: 'centelha_products',
   SETTINGS: 'centelha_settings',
   USER: 'centelha_user',
+  CATEGORIES: 'centelha_categories',
 };
 
 export const storage = {
+  getCategories: (): { id: string; name: string }[] => {
+    const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+    return data ? JSON.parse(data) : [];
+  },
+  saveCategories: (categories: { id: string; name: string }[]) => {
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+  },
+
   getMaterials: (): Material[] => {
     const data = localStorage.getItem(STORAGE_KEYS.MATERIALS);
     return data ? JSON.parse(data) : [];

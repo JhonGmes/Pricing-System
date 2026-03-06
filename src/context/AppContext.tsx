@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Material, IndirectCost, Product, AppSettings, User } from '../types';
+import { Material, IndirectCost, Product, AppSettings, User, Category } from '../types';
 import { storage } from '../services/storage';
 import { dataService } from '../services/dataService';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
+import { generateId } from '../utils';
 
 interface AppContextType {
   user: User;
@@ -24,6 +25,11 @@ interface AppContextType {
   addProduct: (product: Product) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
+
+  categories: Category[];
+  addCategory: (category: Category) => void;
+  updateCategory: (category: Category) => void;
+  deleteCategory: (id: string) => void;
   
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
@@ -32,7 +38,8 @@ interface AppContextType {
     materials?: Material[], 
     indirectCosts?: IndirectCost[], 
     products?: Product[], 
-    settings?: AppSettings 
+    settings?: AppSettings,
+    categories?: Category[]
   }) => void;
 
   isLoading: boolean;
@@ -51,6 +58,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [indirectCosts, setIndirectCosts] = useState<IndirectCost[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
     brandName: '',
     subtitle: '',
@@ -108,17 +116,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Always load data, regardless of auth state (since we default to auth)
       setIsLoading(true);
       try {
-        const [loadedMaterials, loadedCosts, loadedProducts, loadedSettings] = await Promise.all([
+        const [loadedMaterials, loadedCosts, loadedProducts, loadedSettings, loadedCategories] = await Promise.all([
           dataService.getMaterials(),
           dataService.getIndirectCosts(),
           dataService.getProducts(),
-          dataService.getSettings()
+          dataService.getSettings(),
+          dataService.getCategories()
         ]);
 
         setMaterials(loadedMaterials);
         setIndirectCosts(loadedCosts);
         setProducts(loadedProducts);
         setSettings(loadedSettings);
+
+        // Initialize categories from products if empty
+        if (loadedCategories.length === 0 && loadedProducts.length > 0) {
+          const uniqueCategories = Array.from(new Set(loadedProducts.map(p => p.category).filter(Boolean)));
+          const newCategories = uniqueCategories.map(name => ({ id: generateId(), name }));
+          setCategories(newCategories);
+          if (newCategories.length > 0) {
+             await dataService.saveCategories(newCategories);
+          }
+        } else {
+          setCategories(loadedCategories);
+        }
+
       } catch (error) {
         console.error("Failed to load data", error);
       } finally {
@@ -231,6 +253,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await dataService.deleteProduct(id, newProducts);
   };
 
+  const addCategory = async (category: Category) => {
+    const newCategories = [...categories, category];
+    setCategories(newCategories);
+    await dataService.addCategory(category, newCategories);
+  };
+
+  const updateCategory = async (category: Category) => {
+    const newCategories = categories.map(c => c.id === category.id ? category : c);
+    setCategories(newCategories);
+    await dataService.updateCategory(category, newCategories);
+  };
+
+  const deleteCategory = async (id: string) => {
+    const newCategories = categories.filter(c => c.id !== id);
+    setCategories(newCategories);
+    await dataService.deleteCategory(id, newCategories);
+  };
+
   const updateSettingsState = async (newSettings: AppSettings) => {
     setSettings(newSettings);
     await dataService.saveSettings(newSettings);
@@ -240,7 +280,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     materials?: Material[], 
     indirectCosts?: IndirectCost[], 
     products?: Product[], 
-    settings?: AppSettings 
+    settings?: AppSettings,
+    categories?: Category[]
   }) => {
     if (data.materials) {
       setMaterials(data.materials);
@@ -258,6 +299,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSettings(data.settings);
       await dataService.saveSettings(data.settings);
     }
+    if (data.categories) {
+      setCategories(data.categories);
+      await dataService.saveCategories(data.categories);
+    }
   };
 
   return (
@@ -266,6 +311,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       materials, addMaterial, updateMaterial, deleteMaterial,
       indirectCosts, addIndirectCost, updateIndirectCost, deleteIndirectCost,
       products, addProduct, updateProduct, deleteProduct,
+      categories, addCategory, updateCategory, deleteCategory,
       settings, updateSettings: updateSettingsState,
       importData,
       isLoading,

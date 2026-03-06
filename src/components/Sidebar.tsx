@@ -10,7 +10,8 @@ import {
   LogOut, 
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { cn } from '../utils';
@@ -34,6 +35,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Package, label: 'Matérias-Primas', path: '/materials' },
     { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
+    { icon: Tag, label: 'Categorias', path: '/categories' },
     { icon: ShoppingBag, label: 'Produtos', path: '/products' },
     { icon: BookOpen, label: 'Catálogo', path: '/catalog' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
