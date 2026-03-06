@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
-  const { products, materials, indirectCosts, addProduct, updateProduct, updateMaterials, deleteProduct, settings, categories: appCategories } = useApp();
+  const { products, materials, indirectCosts, addProduct, updateProduct, updateMaterials, deleteProduct, settings, categories: appCategories, addStockMovement } = useApp();
   const [view, setView] = useState<'list' | 'form'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -121,46 +121,58 @@ export default function Products() {
     };
 
     if (formData.id) {
-      updateProduct(productData);
+      await updateProduct(productData);
     } else {
-      addProduct(productData);
+      await addProduct(productData);
 
-      // Handle stock deduction for new products
-      if (deductStock && formData.materials && formData.materials.length > 0) {
+      const stockQty = formData.stockQuantity || 0;
+      const batchSize = formData.batchSize || 1;
+      
+      // 1. Log Product Entry (if stock > 0)
+      if (stockQty > 0) {
+        await addStockMovement({
+          id: crypto.randomUUID(),
+          itemId: productData.id,
+          itemType: 'product',
+          type: 'entry',
+          quantity: stockQty,
+          reason: 'Estoque Inicial (Criação)',
+          date: new Date().toISOString(),
+          cost: productData.unitCost,
+          price: productData.finalPrice
+        });
+      }
+
+      // 2. Deduct Materials (if requested and materials exist)
+      if (deductStock && formData.materials && formData.materials.length > 0 && stockQty > 0) {
         const materialsToUpdate: any[] = [];
+        const batches = stockQty / batchSize;
         
-        formData.materials.forEach(pm => {
+        for (const pm of formData.materials) {
           const material = materials.find(m => m.id === pm.materialId);
           if (material) {
-            // Deduct the quantity used for the batch
-            // If the user set an initial stock > 0, we might want to multiply by that?
-            // For now, let's assume deductStock means "I just made ONE batch" regardless of stockQuantity set?
-            // Or if stockQuantity is set to X, and batchSize is Y.
-            // If I say I have 5 units in stock. And batch size is 1.
-            // Did I make 5 batches? Or 1 batch of 5?
-            // Usually batchSize is "how many units I make at once".
-            // If I set stockQuantity to 5, and batchSize is 1. I made 5 batches.
-            // If I set stockQuantity to 5, and batchSize is 5. I made 1 batch.
+            // Calculate total needed: (stockQty / batchSize) * quantityUsedPerBatch
+            const totalQtyUsed = batches * pm.quantityUsed;
             
-            // The user request is simple: "automatically appear in Finished Products with the quantity".
-            // It doesn't explicitly say "deduct materials for that quantity".
-            // But logic dictates if I say I have stock, I used materials.
-            
-            // Current logic: deducts `pm.quantityUsed`.
-            // `pm.quantityUsed` is amount for ONE BATCH.
-            // So this logic assumes we made ONE BATCH.
-            
-            // If stockQuantity is provided, maybe we should check if it aligns with batchSize?
-            // Let's keep it simple: deductStock deducts ONE BATCH worth of materials.
-            // The user can manually adjust stock later if they made more.
-            
-            const newStock = (material.stockQuantity || 0) - pm.quantityUsed;
+            const newStock = (material.stockQuantity || 0) - totalQtyUsed;
             materialsToUpdate.push({
               ...material,
               stockQuantity: newStock
             });
+
+            // Log Material Exit
+            await addStockMovement({
+              id: crypto.randomUUID(),
+              itemId: material.id,
+              itemType: 'material',
+              type: 'exit',
+              quantity: totalQtyUsed,
+              reason: `Produção Inicial: ${productData.name}`,
+              date: new Date().toISOString(),
+              cost: material.unitCost
+            });
           }
-        });
+        }
         
         if (materialsToUpdate.length > 0) {
           await updateMaterials(materialsToUpdate);

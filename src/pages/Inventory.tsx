@@ -9,8 +9,8 @@ import { cn, formatCurrency } from '../utils';
 import { StockMovement } from '../types';
 
 export default function Inventory() {
-  const { materials, updateMaterial, products, updateProduct, stockMovements, addStockMovement } = useApp();
-  const [activeTab, setActiveTab] = useState<'materials' | 'products' | 'history'>('products');
+  const { materials, updateMaterial, updateMaterials, products, updateProduct, stockMovements, addStockMovement } = useApp();
+  const [activeTab, setActiveTab] = useState<'materials' | 'products'>('products');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Edit states
@@ -90,23 +90,72 @@ export default function Inventory() {
   };
 
   const handleSaveProductEdit = async (product: any) => {
-    const diff = editValue - (product.stockQuantity || 0);
+    const oldStock = product.stockQuantity || 0;
+    const newStock = editValue;
+    const diff = newStock - oldStock;
+
     if (diff !== 0) {
+      // 1. Update Product Stock
       await updateProduct({
         ...product,
-        stockQuantity: editValue
+        stockQuantity: newStock
       });
 
-      // Log movement
+      // Log product movement
       await addStockMovement({
         id: crypto.randomUUID(),
         itemId: product.id,
         itemType: 'product',
-        type: diff > 0 ? 'adjustment' : 'adjustment',
+        type: diff > 0 ? 'entry' : 'exit', // Positive diff means we added stock (entry/production)
         quantity: Math.abs(diff),
-        reason: 'Ajuste manual de estoque',
+        reason: diff > 0 ? 'Produção / Entrada Manual' : 'Venda / Saída Manual',
         date: new Date().toISOString(),
+        cost: product.unitCost,
+        price: product.finalPrice
       });
+
+      // 2. Deduct Materials (Only if producing/adding stock)
+      // The user requested: "when I create a product... deducted from raw material"
+      // This implies production logic.
+      if (diff > 0 && product.materials && product.materials.length > 0) {
+        const materialsToUpdate: any[] = [];
+        
+        // We need to fetch the latest material states to ensure accuracy, 
+        // but for now we use the context 'materials' which should be up to date.
+        
+        for (const pm of product.materials) {
+          const material = materials.find(m => m.id === pm.materialId);
+          if (material) {
+            const qtyUsed = pm.quantityUsed * diff; // Total needed for this batch
+            const newMatStock = (material.stockQuantity || 0) - qtyUsed;
+            
+            materialsToUpdate.push({
+              ...material,
+              stockQuantity: newMatStock
+            });
+
+            // Log material movement
+            await addStockMovement({
+              id: crypto.randomUUID(),
+              itemId: material.id,
+              itemType: 'material',
+              type: 'exit', // Used in production
+              quantity: qtyUsed,
+              reason: `Produção: ${product.name}`,
+              date: new Date().toISOString(),
+              cost: material.unitCost
+            });
+          }
+        }
+
+        if (materialsToUpdate.length > 0) {
+          // We need a way to update multiple materials at once to avoid flicker/race conditions
+          // Assuming AppContext has updateMaterials (plural)
+          // If not, we loop updateMaterial. 
+          // Checking AppContext... yes, it has updateMaterials.
+           await updateMaterials(materialsToUpdate);
+        }
+      }
     }
     setEditingId(null);
   };
@@ -167,12 +216,6 @@ export default function Inventory() {
             className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex-1 md:flex-none", activeTab === 'materials' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
           >
             Matérias-Primas
-          </button>
-          <button 
-            onClick={() => setActiveTab('history')}
-            className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex-1 md:flex-none", activeTab === 'history' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
-          >
-            Histórico
           </button>
         </div>
 
@@ -358,64 +401,6 @@ export default function Inventory() {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === 'history' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Data</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Item</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Tipo</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Movimento</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Motivo</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Qtd.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filteredHistory.map(movement => {
-                  const item = movement.itemType === 'material' 
-                    ? materials.find(m => m.id === movement.itemId) 
-                    : products.find(p => p.id === movement.itemId);
-                  
-                  return (
-                    <tr key={movement.id} className="hover:bg-gray-50/50">
-                      <td className="px-6 py-4 text-gray-500">
-                        {new Date(movement.date).toLocaleDateString()} <span className="text-xs opacity-70">{new Date(movement.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                      </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        {item?.name || 'Item desconhecido'}
-                        <span className="ml-2 text-xs text-gray-400 border border-gray-200 px-1 rounded">
-                          {movement.itemType === 'material' ? 'Matéria-prima' : 'Produto'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {movement.type === 'entry' && <span className="text-emerald-600 flex items-center gap-1"><ArrowDownRight size={14} /> Entrada</span>}
-                        {movement.type === 'exit' && <span className="text-red-600 flex items-center gap-1"><ArrowUpRight size={14} /> Saída</span>}
-                        {movement.type === 'adjustment' && <span className="text-blue-600 flex items-center gap-1"><History size={14} /> Ajuste</span>}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500">
-                        {movement.type === 'entry' ? '+' : movement.type === 'exit' ? '-' : ''}{movement.quantity}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500">{movement.reason || '-'}</td>
-                      <td className="px-6 py-4 text-center">
-                        {/* Could show running balance if calculated */}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredHistory.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                      Nenhum histórico encontrado.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>

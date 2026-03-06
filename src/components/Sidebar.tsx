@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Archive,
-  Tag
+  Tag,
+  History
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { cn } from '../utils';
@@ -36,6 +37,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Package, label: 'Matérias-Primas', path: '/materials' },
     { icon: Archive, label: 'Estoque', path: '/inventory' },
+    { icon: History, label: 'Histórico', path: '/history' },
     { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
     { icon: Tag, label: 'Categorias', path: '/categories' },
     { icon: ShoppingBag, label: 'Produtos', path: '/products' },
