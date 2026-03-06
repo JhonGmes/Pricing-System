@@ -12,12 +12,14 @@ export default function Catalog() {
   const catalogRef = useRef<HTMLDivElement>(null);
 
   // Group products by category
-  const groupedProducts = products.reduce((acc, product) => {
-    const category = product.category || 'Outros';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(product);
-    return acc;
-  }, {} as Record<string, Product[]>);
+  const groupedProducts = products
+    .filter(product => product.active !== false)
+    .reduce((acc, product) => {
+      const category = product.category || 'Outros';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(product);
+      return acc;
+    }, {} as Record<string, Product[]>);
 
   const handlePrint = () => {
     window.print();
