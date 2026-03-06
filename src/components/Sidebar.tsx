@@ -39,8 +39,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: Package, label: 'Matérias-Primas', path: '/materials' },
     { icon: Archive, label: 'Estoque', path: '/inventory' },
     { icon: BookOpen, label: 'Catálogo', path: '/catalog' },
-    { icon: Tag, label: 'Categorias', path: '/categories' },
-    { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
+    { icon: Tag, label: 'Categoria', path: '/categories' },
+    { icon: Zap, label: 'Custos indiretos', path: '/costs' },
     { icon: History, label: 'Histórico', path: '/history' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];

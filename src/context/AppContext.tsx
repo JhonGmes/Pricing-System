@@ -206,16 +206,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser({ name: '', email: '', isAuthenticated: false });
   };
 
+  const addStockMovement = async (movement: StockMovement) => {
+    const newMovements = [movement, ...stockMovements];
+    setStockMovements(newMovements);
+    await dataService.addStockMovement(movement);
+  };
+
   const addMaterial = async (material: Material) => {
     const newMaterials = [...materials, material];
     setMaterials(newMaterials);
     await dataService.addMaterial(material, newMaterials);
+
+    // Log initial stock entry if quantity > 0
+    if (material.stockQuantity > 0) {
+      const movement: StockMovement = {
+        id: generateId(),
+        itemId: material.id,
+        itemType: 'material',
+        type: 'entry',
+        quantity: material.stockQuantity,
+        reason: 'Estoque Inicial',
+        date: new Date().toISOString(),
+        cost: material.unitCost * material.stockQuantity
+      };
+      await addStockMovement(movement);
+    }
   };
 
   const updateMaterial = async (material: Material) => {
+    const oldMaterial = materials.find(m => m.id === material.id);
     const newMaterials = materials.map(m => m.id === material.id ? material : m);
     setMaterials(newMaterials);
     await dataService.updateMaterial(material, newMaterials);
+
+    // Log stock adjustment if quantity changed
+    if (oldMaterial && oldMaterial.stockQuantity !== material.stockQuantity) {
+      const diff = material.stockQuantity - oldMaterial.stockQuantity;
+      const type = diff > 0 ? 'entry' : 'exit';
+      const quantity = Math.abs(diff);
+      
+      const movement: StockMovement = {
+        id: generateId(),
+        itemId: material.id,
+        itemType: 'material',
+        type: type,
+        quantity: quantity,
+        reason: 'Ajuste de Estoque',
+        date: new Date().toISOString(),
+        cost: material.unitCost * quantity
+      };
+      await addStockMovement(movement);
+    }
   };
 
   const updateMaterials = async (updatedMaterials: Material[]) => {
@@ -283,12 +324,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const newCategories = categories.filter(c => c.id !== id);
     setCategories(newCategories);
     await dataService.deleteCategory(id, newCategories);
-  };
-
-  const addStockMovement = async (movement: StockMovement) => {
-    const newMovements = [movement, ...stockMovements];
-    setStockMovements(newMovements);
-    await dataService.addStockMovement(movement);
   };
 
   const updateSettingsState = async (newSettings: AppSettings) => {
