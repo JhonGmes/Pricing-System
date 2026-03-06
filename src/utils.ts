@@ -33,3 +33,15 @@ export function fileToBase64(file: File): Promise<string> {
     reader.onerror = (error) => reject(error);
   });
 }
+
+export function parseNumber(value: string | number | undefined | null): number {
+  if (!value) return 0;
+  const stringValue = String(value);
+  // If value has a comma, assume it's the decimal separator (PT-BR)
+  // Remove dots (thousand separators) and replace comma with dot
+  if (stringValue.includes(',')) {
+    return parseFloat(stringValue.replace(/\./g, '').replace(',', '.'));
+  }
+  // Otherwise, assume dot is the decimal separator (or just a number)
+  return parseFloat(stringValue);
+}

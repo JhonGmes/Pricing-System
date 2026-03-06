@@ -11,6 +11,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Archive,
   Tag
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -34,6 +35,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Package, label: 'Matérias-Primas', path: '/materials' },
+    { icon: Archive, label: 'Estoque', path: '/inventory' },
     { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
     { icon: Tag, label: 'Categorias', path: '/categories' },
     { icon: ShoppingBag, label: 'Produtos', path: '/products' },

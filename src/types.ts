@@ -12,6 +12,8 @@ export interface Material {
   quantityBought: number;
   pricePaid: number;
   unitCost: number;
+  stockQuantity: number; // Current stock level
+  minStockLevel?: number; // Alert level
   history: { date: string; price: number }[];
   createdAt: string;
 }

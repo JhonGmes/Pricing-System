@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Material } from '../types';
-import { generateId, formatCurrency, formatUnitCost } from '../utils';
+import { generateId, formatCurrency, formatUnitCost, parseNumber } from '../utils';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
@@ -34,17 +34,6 @@ export default function Materials() {
   };
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
-
-  const parseNumber = (value: string) => {
-    if (!value) return 0;
-    // If value has a comma, assume it's the decimal separator (PT-BR)
-    // Remove dots (thousand separators) and replace comma with dot
-    if (value.includes(',')) {
-      return parseFloat(value.replace(/\./g, '').replace(',', '.'));
-    }
-    // Otherwise, assume dot is the decimal separator (or just a number)
-    return parseFloat(value);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -87,11 +87,17 @@ export const dataService = {
         quantityBought: Number(item.quantity_bought),
         pricePaid: Number(item.price_paid),
         unitCost: Number(item.unit_cost),
+        stockQuantity: Number(item.stock_quantity || 0),
+        minStockLevel: item.min_stock_level ? Number(item.min_stock_level) : undefined,
         history: item.history || [],
         createdAt: item.created_at
       }));
     }
-    return storage.getMaterials();
+    const materials = await storage.getMaterials();
+    return materials.map(m => ({
+      ...m,
+      stockQuantity: m.stockQuantity || 0
+    }));
   },
 
   async addMaterial(material: Material, allMaterials: Material[]) {
@@ -105,6 +111,8 @@ export const dataService = {
         quantity_bought: material.quantityBought,
         price_paid: material.pricePaid,
         unit_cost: material.unitCost,
+        stock_quantity: material.stockQuantity,
+        min_stock_level: material.minStockLevel,
         history: material.history,
         created_at: material.createdAt
       }]);
@@ -124,6 +132,8 @@ export const dataService = {
         quantity_bought: material.quantityBought,
         price_paid: material.pricePaid,
         unit_cost: material.unitCost,
+        stock_quantity: material.stockQuantity,
+        min_stock_level: material.minStockLevel,
         history: material.history,
         // created_at is not updated
       }).eq('id', material.id);
@@ -147,6 +157,8 @@ export const dataService = {
           quantity_bought: m.quantityBought,
           price_paid: m.pricePaid,
           unit_cost: m.unitCost,
+          stock_quantity: m.stockQuantity,
+          min_stock_level: m.minStockLevel,
           history: m.history,
           created_at: m.createdAt
         }))

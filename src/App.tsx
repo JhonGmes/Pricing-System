@@ -9,6 +9,7 @@ import Products from './pages/Products';
 import Catalog from './pages/Catalog';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
+import Inventory from './pages/Inventory';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Authentication check removed as requested
@@ -31,6 +32,12 @@ export default function App() {
           <Route path="/materials" element={
             <ProtectedRoute>
               <Materials />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inventory" element={
+            <ProtectedRoute>
+              <Inventory />
             </ProtectedRoute>
           } />
           

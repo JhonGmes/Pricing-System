@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Product, ProductMaterial, ProductCost } from '../types';
-import { generateId, formatCurrency, cn } from '../utils';
+import { generateId, formatCurrency, formatUnitCost, parseNumber, cn } from '../utils';
 import { storageService } from '../services/storageService';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { DecimalInput } from '../components/DecimalInput';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import { 
   Plus, 
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
-  const { products, materials, indirectCosts, addProduct, updateProduct, deleteProduct, settings, categories: appCategories } = useApp();
+  const { products, materials, indirectCosts, addProduct, updateProduct, updateMaterials, deleteProduct, settings, categories: appCategories } = useApp();
   const [view, setView] = useState<'list' | 'form'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -42,6 +43,7 @@ export default function Products() {
     finalPrice: 0,
   };
   const [formData, setFormData] = useState<Partial<Product>>(initialFormState);
+  const [deductStock, setDeductStock] = useState(true);
   const [simulatorMode, setSimulatorMode] = useState(false);
   const [simulationFactors, setSimulationFactors] = useState({ materialCostMultiplier: 1, marginAddon: 0 });
 
@@ -100,7 +102,7 @@ export default function Products() {
     return ((price - cost) / price) * 100;
   }, [formData.finalPrice, calculations.unitCost]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.batchSize) return;
 
     const productData: Product = {
@@ -116,13 +118,36 @@ export default function Products() {
       updateProduct(productData);
     } else {
       addProduct(productData);
+
+      // Handle stock deduction for new products
+      if (deductStock && formData.materials && formData.materials.length > 0) {
+        const materialsToUpdate: any[] = [];
+        
+        formData.materials.forEach(pm => {
+          const material = materials.find(m => m.id === pm.materialId);
+          if (material) {
+            // Deduct the quantity used for the batch
+            const newStock = (material.stockQuantity || 0) - pm.quantityUsed;
+            materialsToUpdate.push({
+              ...material,
+              stockQuantity: newStock
+            });
+          }
+        });
+        
+        if (materialsToUpdate.length > 0) {
+          await updateMaterials(materialsToUpdate);
+        }
+      }
     }
     setView('list');
     setFormData(initialFormState);
+    setDeductStock(true);
   };
 
   const handleEdit = (product: Product) => {
     setFormData(product);
+    setDeductStock(false); // Default to false for edits to avoid double deduction
     setView('form');
   };
 
@@ -220,6 +245,22 @@ export default function Products() {
               <Calculator size={18} className="mr-2" />
               {simulatorMode ? 'Fechar Simulador' : 'Simular'}
             </Button>
+            
+            {!formData.id && (
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
+                <input
+                  type="checkbox"
+                  id="deductStock"
+                  checked={deductStock}
+                  onChange={e => setDeductStock(e.target.checked)}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                />
+                <label htmlFor="deductStock" className="text-sm font-medium text-gray-700 cursor-pointer select-none whitespace-nowrap">
+                  Baixar Estoque
+                </label>
+              </div>
+            )}
+
             <Button onClick={handleSave} className="shadow-lg shadow-indigo-500/20">
               <Save size={18} className="mr-2" />
               Salvar
@@ -309,12 +350,11 @@ export default function Products() {
                       )}
                     </select>
                   </div>
-                  <Input
+                  <DecimalInput
                     label="Rendimento (Lote)"
-                    type="number"
-                    min="1"
-                    value={formData.batchSize}
-                    onChange={e => setFormData({...formData, batchSize: parseFloat(e.target.value)})}
+                    min={1}
+                    value={formData.batchSize || 1}
+                    onChange={val => setFormData({...formData, batchSize: val})}
                     placeholder="Qtd de unidades"
                   />
                 </div>
@@ -374,23 +414,21 @@ export default function Products() {
                         >
                           <option value="">Selecione...</option>
                           {materials.map(m => (
-                            <option key={m.id} value={m.id}>{m.name} ({formatCurrency(m.unitCost)}/{m.unit})</option>
+                            <option key={m.id} value={m.id}>{m.name} ({formatUnitCost(m.unitCost)}/{m.unit})</option>
                           ))}
                         </select>
                       </div>
                       <div className="w-32">
                         <label className="text-xs font-medium text-gray-500 mb-1 block">Qtd Usada</label>
-                        <Input
-                          type="number"
-                          step="0.001"
-                          min="0"
+                        <DecimalInput
+                          min={0}
                           value={pm.quantityUsed}
-                          onChange={e => updateRecipeMaterial(index, 'quantityUsed', parseFloat(e.target.value))}
+                          onChange={val => updateRecipeMaterial(index, 'quantityUsed', val)}
                           className="h-9"
                         />
                       </div>
                       <div className="w-24 pb-2 text-right font-mono text-sm text-gray-600">
-                        {material ? formatCurrency(material.unitCost * pm.quantityUsed) : '-'}
+                        {material ? formatUnitCost(material.unitCost * pm.quantityUsed) : '-'}
                       </div>
                       <button 
                         onClick={() => removeMaterialFromRecipe(index)}
@@ -497,17 +535,15 @@ export default function Products() {
                 <CardTitle>Precificação</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
-                <Input
+                <DecimalInput
                   label="Margem Desejada (%)"
-                  type="number"
-                  value={formData.desiredMarginPercent}
-                  onChange={e => setFormData({...formData, desiredMarginPercent: parseFloat(e.target.value)})}
+                  value={formData.desiredMarginPercent || 0}
+                  onChange={val => setFormData({...formData, desiredMarginPercent: val})}
                 />
-                <Input
+                <DecimalInput
                   label="Lucro Fixo Adicional (R$)"
-                  type="number"
-                  value={formData.fixedProfitAddon}
-                  onChange={e => setFormData({...formData, fixedProfitAddon: parseFloat(e.target.value)})}
+                  value={formData.fixedProfitAddon || 0}
+                  onChange={val => setFormData({...formData, fixedProfitAddon: val})}
                 />
                 
                 <div className="pt-4 border-t border-gray-100 space-y-3">
@@ -520,12 +556,10 @@ export default function Products() {
                     <label className="block text-sm font-bold text-indigo-900 mb-1">Preço Final de Venda</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 font-bold">R$</span>
-                      <input
-                        type="number"
-                        step="0.01"
+                      <DecimalInput
                         className="w-full pl-10 pr-4 py-2 rounded-lg border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-xl text-indigo-900 bg-white"
-                        value={formData.finalPrice}
-                        onChange={e => setFormData({...formData, finalPrice: parseFloat(e.target.value)})}
+                        value={formData.finalPrice || 0}
+                        onChange={val => setFormData({...formData, finalPrice: val})}
                       />
                     </div>
                   </div>

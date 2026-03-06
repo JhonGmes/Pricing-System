@@ -14,6 +14,7 @@ interface AppContextType {
   materials: Material[];
   addMaterial: (material: Material) => void;
   updateMaterial: (material: Material) => void;
+  updateMaterials: (materials: Material[]) => Promise<void>;
   deleteMaterial: (id: string) => void;
   
   indirectCosts: IndirectCost[];
@@ -211,6 +212,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await dataService.updateMaterial(material, newMaterials);
   };
 
+  const updateMaterials = async (updatedMaterials: Material[]) => {
+    const updates = new Map(updatedMaterials.map(m => [m.id, m]));
+    const newMaterials = materials.map(m => updates.get(m.id) || m);
+    setMaterials(newMaterials);
+    await dataService.saveMaterials(newMaterials);
+  };
+
   const deleteMaterial = async (id: string) => {
     const newMaterials = materials.filter(m => m.id !== id);
     setMaterials(newMaterials);
@@ -308,7 +316,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       user, login, signup, logout,
-      materials, addMaterial, updateMaterial, deleteMaterial,
+      materials, addMaterial, updateMaterial, updateMaterials, deleteMaterial,
       indirectCosts, addIndirectCost, updateIndirectCost, deleteIndirectCost,
       products, addProduct, updateProduct, deleteProduct,
       categories, addCategory, updateCategory, deleteCategory,
