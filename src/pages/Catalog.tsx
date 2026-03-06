@@ -95,8 +95,8 @@ export default function Catalog() {
           >
             <div className="absolute top-12 right-12">
                {/* Logo on Cover */}
-               {settings.logo ? (
-                 <img src={settings.logo} alt="Logo" className="w-24 h-24 object-contain" />
+               {catalogSettings.logo || settings.logo ? (
+                 <img src={catalogSettings.logo || settings.logo!} alt="Logo" className="w-24 h-24 object-contain" />
                ) : (
                  <div className="w-24 h-24 rounded-full border-2 flex items-center justify-center" style={{ borderColor: catalogSettings.primaryColor }}>
                     <span className="font-serif font-bold text-2xl">{settings.brandName.charAt(0)}</span>
@@ -151,8 +151,8 @@ export default function Catalog() {
                   </div>
                   <div className="flex items-center gap-3">
                      {/* Small Logo in Header */}
-                     {settings.logo && (
-                       <img src={settings.logo} alt="Logo" className="h-10 w-auto object-contain" />
+                     {(catalogSettings.logo || settings.logo) && (
+                       <img src={catalogSettings.logo || settings.logo!} alt="Logo" className="h-10 w-auto object-contain" />
                      )}
                   </div>
                 </div>

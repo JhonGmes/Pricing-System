@@ -82,7 +82,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       productsPerPage: 4,
       showPrice: true,
       showDescription: true,
-      showCode: false
+      showCode: false,
+      logo: null
     }
   });
   
@@ -163,7 +164,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             productsPerPage: 4,
             showPrice: true,
             showDescription: true,
-            showCode: false
+            showCode: false,
+            logo: null
           }
         });
         

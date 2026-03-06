@@ -90,6 +90,7 @@ export interface CatalogSettings {
   showPrice: boolean;
   showDescription: boolean;
   showCode: boolean;
+  logo?: string | null; // Custom logo for catalog
 }
 
 export interface AppSettings {

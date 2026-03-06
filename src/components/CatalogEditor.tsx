@@ -3,8 +3,9 @@ import { useApp } from '../context/AppContext';
 import { Input } from './Input';
 import { Button } from './Button';
 import { Card, CardContent, CardHeader, CardTitle } from './Card';
-import { LayoutTemplate, Palette, Type, Image as ImageIcon, Eye } from 'lucide-react';
+import { LayoutTemplate, Palette, Type, Image as ImageIcon, Eye, Upload } from 'lucide-react';
 import { CatalogSettings } from '../types';
+import { fileToBase64 } from '../utils';
 
 export function CatalogEditor() {
   const { settings, updateSettings } = useApp();
@@ -20,6 +21,17 @@ export function CatalogEditor() {
   const handleChange = (field: keyof CatalogSettings, value: any) => {
     const newSettings = { ...localSettings, [field]: value };
     setLocalSettings(newSettings);
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      try {
+        const base64 = await fileToBase64(e.target.files[0]);
+        handleChange('logo', base64);
+      } catch (err) {
+        console.error("Error uploading logo", err);
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -64,6 +76,36 @@ export function CatalogEditor() {
 
             {activeTab === 'cover' && (
               <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Logo do Catálogo</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 relative group transition-all hover:border-indigo-400 hover:bg-indigo-50">
+                      {localSettings.logo ? (
+                        <img src={localSettings.logo} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-center p-1">
+                          <Upload size={20} className="text-gray-300 mx-auto" />
+                        </div>
+                      )}
+                      <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white backdrop-blur-sm">
+                        <Upload size={16} />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                      </label>
+                    </div>
+                    <div className="text-xs text-gray-500 flex-1">
+                      <p>Se não definido, o logo do sistema será usado.</p>
+                      {localSettings.logo && (
+                        <button 
+                          onClick={() => handleChange('logo', null)}
+                          className="text-red-500 hover:text-red-700 mt-1 underline"
+                        >
+                          Remover logo
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <Input
                   label="Título da Capa"
                   value={localSettings.coverTitle}
@@ -196,9 +238,13 @@ export function CatalogEditor() {
               <div className="h-full flex flex-col items-center justify-center p-12 relative">
                 <div className="absolute top-12 right-12">
                    {/* Optional Icon/Logo placeholder */}
-                   <div className="w-16 h-16 rounded-full border-2 flex items-center justify-center" style={{ borderColor: localSettings.primaryColor }}>
-                      <ImageIcon size={24} />
-                   </div>
+                   {localSettings.logo || settings.logo ? (
+                     <img src={localSettings.logo || settings.logo!} alt="Logo" className="w-24 h-24 object-contain" />
+                   ) : (
+                     <div className="w-16 h-16 rounded-full border-2 flex items-center justify-center" style={{ borderColor: localSettings.primaryColor }}>
+                        <ImageIcon size={24} />
+                     </div>
+                   )}
                 </div>
                 
                 <div className="text-center space-y-6">
