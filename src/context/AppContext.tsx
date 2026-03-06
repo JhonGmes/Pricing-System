@@ -69,7 +69,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     subtitle: '',
     logo: '',
     defaultMarginPercent: 50,
-    defaultFixedCost: 0
+    defaultFixedCost: 0,
+    catalog: {
+      coverTitle: '',
+      coverSubtitle: '',
+      coverFooter: '',
+      headerText: '',
+      footerText: '',
+      primaryColor: '#3e1c1c',
+      secondaryColor: '#F5F2ED',
+      textColor: '#3e1c1c',
+      productsPerPage: 4,
+      showPrice: true,
+      showDescription: true,
+      showCode: false
+    }
   });
   
   const [isLoading, setIsLoading] = useState(true);
@@ -133,7 +147,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setMaterials(loadedMaterials);
         setIndirectCosts(loadedCosts);
         setProducts(loadedProducts);
-        setSettings(loadedSettings);
+        
+        // Merge loaded settings with default catalog settings if missing
+        setSettings({
+          ...loadedSettings,
+          catalog: loadedSettings.catalog || {
+            coverTitle: loadedSettings.brandName || '',
+            coverSubtitle: loadedSettings.subtitle || '',
+            coverFooter: 'www.seusite.com.br',
+            headerText: loadedSettings.brandName || '',
+            footerText: 'Feito à mão com amor',
+            primaryColor: '#3e1c1c',
+            secondaryColor: '#F5F2ED',
+            textColor: '#3e1c1c',
+            productsPerPage: 4,
+            showPrice: true,
+            showDescription: true,
+            showCode: false
+          }
+        });
+        
         setStockMovements(loadedMovements);
 
         // Initialize categories from products if empty

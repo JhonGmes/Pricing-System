@@ -3,12 +3,14 @@ import { useApp } from '../context/AppContext';
 import { Button } from '../components/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import { Input } from '../components/Input';
-import { Save, Upload, Settings as SettingsIcon, Palette, DollarSign, Database, Download, AlertCircle } from 'lucide-react';
+import { Save, Upload, Settings as SettingsIcon, Palette, DollarSign, Database, Download, AlertCircle, BookOpen } from 'lucide-react';
 import { fileToBase64 } from '../utils';
+import { CatalogEditor } from '../components/CatalogEditor';
 
 export default function Settings() {
   const { settings, updateSettings, materials, indirectCosts, products, importData, isLoading, isSupabaseEnabled } = useApp();
   const [formData, setFormData] = useState(settings);
+  const [activeTab, setActiveTab] = useState<'general' | 'catalog'>('general');
 
   // Update formData when settings change (e.g. after initial load)
   React.useEffect(() => {
@@ -89,18 +91,39 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center gap-4">
-        <div className="p-3 bg-gray-100 rounded-xl text-gray-600">
-          <SettingsIcon size={32} />
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gray-100 rounded-xl text-gray-600">
+            <SettingsIcon size={32} />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Configurações</h2>
+            <p className="text-gray-500 mt-1">Personalize sua marca e padrões do sistema.</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Configurações</h2>
-          <p className="text-gray-500 mt-1">Personalize sua marca e padrões do sistema.</p>
+        
+        {/* Tabs */}
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab('general')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'general' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Geral
+          </button>
+          <button
+            onClick={() => setActiveTab('catalog')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'catalog' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Catálogo
+          </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {activeTab === 'catalog' ? (
+        <CatalogEditor />
+      ) : (
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           {/* Connection Status Banner */}
           {isSupabaseEnabled ? (
@@ -296,6 +319,7 @@ export default function Settings() {
           </Card>
         </div>
       </form>
+      )}
     </div>
   );
 }

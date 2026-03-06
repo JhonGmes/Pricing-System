@@ -77,12 +77,28 @@ export interface StockMovement {
   price?: number; // For exits (selling price)
 }
 
+export interface CatalogSettings {
+  coverTitle: string;
+  coverSubtitle: string;
+  coverFooter: string;
+  headerText: string;
+  footerText: string;
+  primaryColor: string; // For headers, accents (e.g., #3e1c1c)
+  secondaryColor: string; // For backgrounds (e.g., #F5F2ED)
+  textColor: string;
+  productsPerPage: number;
+  showPrice: boolean;
+  showDescription: boolean;
+  showCode: boolean;
+}
+
 export interface AppSettings {
   brandName: string;
   subtitle: string;
   logo: string | null; // Base64
   defaultMarginPercent: number;
   defaultFixedCost: number;
+  catalog?: CatalogSettings;
 }
 
 export interface User {
