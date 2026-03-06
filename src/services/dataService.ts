@@ -35,6 +35,8 @@ export const dataService = {
         finalPrice: Number(item.final_price),
         stockQuantity: Number(item.stock_quantity || 0),
         minStockLevel: item.min_stock_level ? Number(item.min_stock_level) : undefined,
+        code: item.code,
+        active: item.active !== false, // Default to true if null/undefined
         createdAt: item.created_at,
         updatedAt: item.updated_at
       }));
@@ -42,7 +44,8 @@ export const dataService = {
     const products = await storage.getProducts();
     return products.map(p => ({
       ...p,
-      stockQuantity: p.stockQuantity || 0
+      stockQuantity: p.stockQuantity || 0,
+      active: p.active !== false
     }));
   },
 
@@ -64,6 +67,8 @@ export const dataService = {
         final_price: product.finalPrice,
         stock_quantity: product.stockQuantity,
         min_stock_level: product.minStockLevel,
+        code: product.code,
+        active: product.active,
         created_at: product.createdAt,
         updated_at: product.updatedAt
       }]);
@@ -90,6 +95,8 @@ export const dataService = {
         final_price: product.finalPrice,
         stock_quantity: product.stockQuantity,
         min_stock_level: product.minStockLevel,
+        code: product.code,
+        active: product.active,
         updated_at: product.updatedAt
       }).eq('id', product.id);
       if (error) console.error('Error updating product:', error);
@@ -117,6 +124,8 @@ export const dataService = {
           final_price: p.finalPrice,
           stock_quantity: p.stockQuantity,
           min_stock_level: p.minStockLevel,
+          code: p.code,
+          active: p.active,
           created_at: p.createdAt,
           updated_at: p.updatedAt
         }))

@@ -43,6 +43,8 @@ export default function Products() {
     finalPrice: 0,
     stockQuantity: 0,
     minStockLevel: 5,
+    code: '',
+    active: true
   };
   const [formData, setFormData] = useState<Partial<Product>>(initialFormState);
   const [deductStock, setDeductStock] = useState(true);
@@ -352,12 +354,24 @@ export default function Products() {
                 <CardTitle>Informações Básicas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input
-                  label="Nome do Produto"
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  placeholder="Ex: Vela Aromática Lavanda"
-                />
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-1">
+                    <Input
+                      label="Código (Opcional)"
+                      value={formData.code || ''}
+                      onChange={e => setFormData({...formData, code: e.target.value})}
+                      placeholder="Ex: REF-001"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Input
+                      label="Nome do Produto"
+                      value={formData.name}
+                      onChange={e => setFormData({...formData, name: e.target.value})}
+                      placeholder="Ex: Vela Aromática Lavanda"
+                    />
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-700">Categoria</label>

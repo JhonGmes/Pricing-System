@@ -59,6 +59,10 @@ export interface Product {
   // Inventory
   stockQuantity?: number;
   minStockLevel?: number;
+  
+  // Catalog
+  code?: string; // Custom Product Code/ID
+  active?: boolean; // Is active in catalog?
 }
 
 export interface StockMovement {

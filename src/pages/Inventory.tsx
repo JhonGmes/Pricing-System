@@ -111,6 +111,13 @@ export default function Inventory() {
     setEditingId(null);
   };
 
+  const handleToggleActive = async (product: any) => {
+    await updateProduct({
+      ...product,
+      active: product.active === false ? true : false
+    });
+  };
+
   // --- Render Helpers ---
   const renderSummaryCard = (title: string, value: string | number, icon: React.ReactNode, colorClass: string, subtext?: string) => (
     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
@@ -198,6 +205,7 @@ export default function Inventory() {
                   <th className="px-6 py-4 font-semibold text-gray-700 text-center">Estoque</th>
                   <th className="px-6 py-4 font-semibold text-gray-700 text-right">Preço Venda</th>
                   <th className="px-6 py-4 font-semibold text-gray-700 text-right">Custo Unit.</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Catálogo</th>
                   <th className="px-6 py-4 font-semibold text-gray-700 text-center">Status</th>
                 </tr>
               </thead>
@@ -215,7 +223,13 @@ export default function Inventory() {
                         </div>
                         <div>
                           <div className="font-medium text-gray-900">{product.name}</div>
-                          <div className="text-xs text-gray-400">ID: {product.id.substring(0, 6)}</div>
+                          <div className="text-xs text-gray-400">
+                            {product.code ? (
+                              <span className="font-mono text-indigo-500">{product.code}</span>
+                            ) : (
+                              `ID: ${product.id.substring(0, 6)}`
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -247,6 +261,19 @@ export default function Inventory() {
                     </td>
                     <td className="px-6 py-4 text-right font-medium text-gray-900">{formatCurrency(product.finalPrice)}</td>
                     <td className="px-6 py-4 text-right text-gray-500">{formatCurrency(product.unitCost)}</td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => handleToggleActive(product)}
+                        className={cn(
+                          "px-3 py-1 rounded-full text-xs font-medium transition-colors border",
+                          product.active !== false
+                            ? "bg-indigo-100 text-indigo-700 border-indigo-200 hover:bg-indigo-200"
+                            : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200"
+                        )}
+                      >
+                        {product.active !== false ? 'Sim' : 'Não'}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-center">
                       {(product.stockQuantity || 0) > 0 ? (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
