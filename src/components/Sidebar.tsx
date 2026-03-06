@@ -35,13 +35,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: ShoppingBag, label: 'Produtos', path: '/products' },
     { icon: Package, label: 'Matérias-Primas', path: '/materials' },
     { icon: Archive, label: 'Estoque', path: '/inventory' },
-    { icon: History, label: 'Histórico', path: '/history' },
-    { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
-    { icon: Tag, label: 'Categorias', path: '/categories' },
-    { icon: ShoppingBag, label: 'Produtos', path: '/products' },
     { icon: BookOpen, label: 'Catálogo', path: '/catalog' },
+    { icon: Tag, label: 'Categorias', path: '/categories' },
+    { icon: Zap, label: 'Custos Indiretos', path: '/costs' },
+    { icon: History, label: 'Histórico', path: '/history' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
 
