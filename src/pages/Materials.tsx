@@ -93,26 +93,26 @@ export default function Materials() {
   const calculatedUnitCost = (formData.pricePaid || 0) / (formData.quantityBought || 1);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Matérias-Primas</h2>
-          <p className="text-gray-500">Gerencie seu estoque e custos de aquisição.</p>
+          <h2 className="text-2xl font-bold text-gray-900">Matérias-Primas</h2>
+          <p className="text-sm text-gray-500">Gerencie seu estoque e custos de aquisição.</p>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
-            className="pl-10 bg-gray-50 border-gray-200" 
+            className="pl-9 bg-gray-50 border-gray-200" 
             placeholder="Buscar por nome, categoria ou fornecedor..." 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
         <Button onClick={openNewModal} className="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 text-white">
-          <Plus size={20} className="mr-2" /> Adicionar Material
+          <Plus size={18} className="mr-2" /> Adicionar Material
         </Button>
       </div>
 
@@ -121,35 +121,35 @@ export default function Materials() {
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4">Nome</th>
-                <th className="px-6 py-4">Categoria</th>
-                <th className="px-6 py-4">Fornecedor</th>
-                <th className="px-6 py-4 text-right">Compra</th>
-                <th className="px-6 py-4 text-right">Custo Unitário</th>
-                <th className="px-6 py-4 text-center">Ações</th>
+                <th className="px-4 py-3">Nome</th>
+                <th className="px-4 py-3">Categoria</th>
+                <th className="px-4 py-3">Fornecedor</th>
+                <th className="px-4 py-3 text-right">Compra</th>
+                <th className="px-4 py-3 text-right">Custo Unitário</th>
+                <th className="px-4 py-3 text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredMaterials.length > 0 ? (
                 filteredMaterials.map((material) => (
                   <tr key={material.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{material.name}</td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 uppercase tracking-wide">
+                    <td className="px-4 py-3 font-medium text-gray-900">{material.name}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 uppercase tracking-wide">
                         {material.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">{material.supplier || '-'}</td>
-                    <td className="px-6 py-4 text-right text-gray-500">
+                    <td className="px-4 py-3 text-gray-500">{material.supplier || '-'}</td>
+                    <td className="px-4 py-3 text-right text-gray-500">
                       <div className="flex flex-col items-end">
                         <span>{material.quantityBought} {material.unit}</span>
                         <span className="text-xs text-gray-400">{formatCurrency(material.pricePaid)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-[#D97706]">
+                    <td className="px-4 py-3 text-right font-bold text-[#D97706]">
                       {formatCurrency(material.unitCost)} <span className="text-gray-400 font-normal text-xs">/{material.unit}</span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button 
                           onClick={() => openEditModal(material)}
@@ -169,7 +169,7 @@ export default function Materials() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                     Nenhum material encontrado.
                   </td>
                 </tr>

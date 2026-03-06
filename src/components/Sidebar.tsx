@@ -53,21 +53,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside className={cn(
         "fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:transform-none flex flex-col",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        isCollapsed ? "w-20" : "w-72"
+        isCollapsed ? "w-16" : "w-64"
       )}>
         {/* Header */}
         <div className={cn(
           "flex flex-col items-center border-b border-gray-50 transition-all duration-300",
-          isCollapsed ? "p-4" : "p-8"
+          isCollapsed ? "p-3" : "p-6"
         )}>
           <div className={cn(
             "rounded-full overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-300",
-            isCollapsed ? "w-10 h-10 mb-2" : "w-24 h-24 mb-4"
+            isCollapsed ? "w-8 h-8 mb-2" : "w-16 h-16 mb-3"
           )}>
              {settings.logo ? (
               <img src={settings.logo} alt="Logo" className="w-full h-full object-cover" />
             ) : (
-              <div className={cn("font-serif text-gray-300", isCollapsed ? "text-xl" : "text-3xl")}>
+              <div className={cn("font-serif text-gray-300", isCollapsed ? "text-lg" : "text-2xl")}>
                 {settings.brandName.charAt(0)}
               </div>
             )}
@@ -75,7 +75,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           
           {!isCollapsed && (
             <>
-              <h1 className="font-serif font-bold text-xl text-gray-900 leading-tight text-center transition-opacity duration-300">
+              <h1 className="font-serif font-bold text-lg text-gray-900 leading-tight text-center transition-opacity duration-300">
                 {settings.brandName}
               </h1>
               <p className="text-[10px] tracking-widest uppercase text-gray-500 mt-1 text-center transition-opacity duration-300">
@@ -86,19 +86,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           
           {/* Mobile Close Button */}
           <button onClick={onClose} className="absolute top-4 right-4 lg:hidden text-gray-400">
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => window.innerWidth < 1024 && onClose()}
               className={({ isActive }) => cn(
-                "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative",
                 isActive 
                   ? "bg-[#FFF8F0] text-[#D97706]" 
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
@@ -106,7 +106,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
               title={isCollapsed ? item.label : undefined}
             >
-              <item.icon size={20} strokeWidth={1.5} className="shrink-0" />
+              <item.icon size={18} strokeWidth={1.5} className="shrink-0" />
               
               {!isCollapsed && (
                 <span className="whitespace-nowrap transition-opacity duration-300">
