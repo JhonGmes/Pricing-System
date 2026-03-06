@@ -35,6 +35,9 @@ interface AppContextType {
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
   
+  stockMovements: StockMovement[];
+  addStockMovement: (movement: StockMovement) => void;
+
   importData: (data: { 
     materials?: Material[], 
     indirectCosts?: IndirectCost[], 
@@ -60,6 +63,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [indirectCosts, setIndirectCosts] = useState<IndirectCost[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
     brandName: '',
     subtitle: '',
@@ -117,18 +121,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Always load data, regardless of auth state (since we default to auth)
       setIsLoading(true);
       try {
-        const [loadedMaterials, loadedCosts, loadedProducts, loadedSettings, loadedCategories] = await Promise.all([
+        const [loadedMaterials, loadedCosts, loadedProducts, loadedSettings, loadedCategories, loadedMovements] = await Promise.all([
           dataService.getMaterials(),
           dataService.getIndirectCosts(),
           dataService.getProducts(),
           dataService.getSettings(),
-          dataService.getCategories()
+          dataService.getCategories(),
+          dataService.getStockMovements()
         ]);
 
         setMaterials(loadedMaterials);
         setIndirectCosts(loadedCosts);
         setProducts(loadedProducts);
         setSettings(loadedSettings);
+        setStockMovements(loadedMovements);
 
         // Initialize categories from products if empty
         if (loadedCategories.length === 0 && loadedProducts.length > 0) {
@@ -279,6 +285,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await dataService.deleteCategory(id, newCategories);
   };
 
+  const addStockMovement = async (movement: StockMovement) => {
+    const newMovements = [movement, ...stockMovements];
+    setStockMovements(newMovements);
+    await dataService.addStockMovement(movement);
+  };
+
   const updateSettingsState = async (newSettings: AppSettings) => {
     setSettings(newSettings);
     await dataService.saveSettings(newSettings);
@@ -321,6 +333,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       products, addProduct, updateProduct, deleteProduct,
       categories, addCategory, updateCategory, deleteCategory,
       settings, updateSettings: updateSettingsState,
+      stockMovements, addStockMovement,
       importData,
       isLoading,
       isSupabaseEnabled

@@ -1,111 +1,396 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Card, CardContent } from '../components/Card';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { Search, AlertTriangle, Save, Package, Edit2 } from 'lucide-react';
+import { Search, AlertTriangle, Save, Package, Edit2, TrendingUp, TrendingDown, DollarSign, Archive, History, Filter, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { DecimalInput } from '../components/DecimalInput';
-import { cn } from '../utils';
+import { cn, formatCurrency } from '../utils';
+import { StockMovement } from '../types';
 
 export default function Inventory() {
-  const { materials, updateMaterial } = useApp();
+  const { materials, updateMaterial, products, updateProduct, stockMovements, addStockMovement } = useApp();
+  const [activeTab, setActiveTab] = useState<'materials' | 'products' | 'history'>('products');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Edit states
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<number>(0);
 
-  const filteredMaterials = materials.filter(m => 
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter states
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
+  // --- Dashboard Metrics ---
+  const metrics = useMemo(() => {
+    // Materials
+    const materialValue = materials.reduce((acc, m) => acc + ((m.stockQuantity || 0) * m.unitCost), 0);
+    const lowStockMaterials = materials.filter(m => m.minStockLevel && (m.stockQuantity || 0) <= m.minStockLevel).length;
+    const outOfStockMaterials = materials.filter(m => (m.stockQuantity || 0) <= 0).length;
+
+    // Products
+    const productValue = products.reduce((acc, p) => acc + ((p.stockQuantity || 0) * p.finalPrice), 0); // Sales value
+    const productCost = products.reduce((acc, p) => acc + ((p.stockQuantity || 0) * p.unitCost), 0); // Cost value
+    const lowStockProducts = products.filter(p => p.minStockLevel && (p.stockQuantity || 0) <= p.minStockLevel).length;
+    const outOfStockProducts = products.filter(p => (p.stockQuantity || 0) <= 0).length;
+
+    return {
+      totalValue: materialValue + productValue,
+      totalCost: materialValue + productCost,
+      potentialProfit: productValue - productCost,
+      lowStock: lowStockMaterials + lowStockProducts,
+      outOfStock: outOfStockMaterials + outOfStockProducts,
+      inStock: (materials.length - outOfStockMaterials) + (products.length - outOfStockProducts)
+    };
+  }, [materials, products]);
+
+  // --- Filtering ---
+  const filteredMaterials = useMemo(() => materials.filter(m => 
+    m.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (categoryFilter === 'all' || m.category === categoryFilter)
+  ), [materials, searchTerm, categoryFilter]);
+
+  const filteredProducts = useMemo(() => products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (categoryFilter === 'all' || p.category === categoryFilter)
+  ), [products, searchTerm, categoryFilter]);
+
+  const filteredHistory = useMemo(() => stockMovements.filter(m => {
+    const item = m.itemType === 'material' 
+      ? materials.find(mat => mat.id === m.itemId) 
+      : products.find(prod => prod.id === m.itemId);
+    return item?.name.toLowerCase().includes(searchTerm.toLowerCase());
+  }), [stockMovements, materials, products, searchTerm]);
+
+  // --- Handlers ---
   const handleStartEdit = (id: string, currentStock: number) => {
     setEditingId(id);
     setEditValue(currentStock);
   };
 
-  const handleSaveEdit = (material: any) => {
-    updateMaterial({
-      ...material,
-      stockQuantity: editValue
-    });
+  const handleSaveMaterialEdit = async (material: any) => {
+    const diff = editValue - (material.stockQuantity || 0);
+    if (diff !== 0) {
+      await updateMaterial({
+        ...material,
+        stockQuantity: editValue
+      });
+      
+      // Log movement
+      await addStockMovement({
+        id: crypto.randomUUID(),
+        itemId: material.id,
+        itemType: 'material',
+        type: diff > 0 ? 'adjustment' : 'adjustment', // Could be entry/exit if we had more context
+        quantity: Math.abs(diff),
+        reason: 'Ajuste manual de estoque',
+        date: new Date().toISOString(),
+      });
+    }
     setEditingId(null);
   };
 
+  const handleSaveProductEdit = async (product: any) => {
+    const diff = editValue - (product.stockQuantity || 0);
+    if (diff !== 0) {
+      await updateProduct({
+        ...product,
+        stockQuantity: editValue
+      });
+
+      // Log movement
+      await addStockMovement({
+        id: crypto.randomUUID(),
+        itemId: product.id,
+        itemType: 'product',
+        type: diff > 0 ? 'adjustment' : 'adjustment',
+        quantity: Math.abs(diff),
+        reason: 'Ajuste manual de estoque',
+        date: new Date().toISOString(),
+      });
+    }
+    setEditingId(null);
+  };
+
+  // --- Render Helpers ---
+  const renderSummaryCard = (title: string, value: string | number, icon: React.ReactNode, colorClass: string, subtext?: string) => (
+    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+      <div>
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</p>
+        <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
+        {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+      </div>
+      <div className={cn("p-3 rounded-lg bg-opacity-10", colorClass)}>
+        {icon}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Estoque</h2>
-          <p className="text-sm text-gray-500 mt-1">Gerencie a quantidade disponível de suas matérias-primas.</p>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Gestão de Estoque</h2>
+          <p className="text-sm text-gray-500 mt-1">Monitore entradas, saídas e níveis de produtos e materiais.</p>
+        </div>
+        <div className="flex gap-2">
+           {/* Export/Actions could go here */}
         </div>
       </div>
 
-      <div className="flex items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-        <Search className="text-gray-400 ml-2" size={18} />
-        <Input 
-          className="border-none shadow-none focus:ring-0" 
-          placeholder="Buscar material..." 
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
+      {/* Metrics Dashboard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {renderSummaryCard("Valor em Estoque", formatCurrency(metrics.totalValue), <DollarSign className="text-emerald-600" />, "bg-emerald-500", "Preço de Venda Total")}
+        {renderSummaryCard("Custo do Estoque", formatCurrency(metrics.totalCost), <TrendingDown className="text-blue-600" />, "bg-blue-500", "Custo de Produção")}
+        {renderSummaryCard("Lucro Previsto", formatCurrency(metrics.potentialProfit), <TrendingUp className="text-indigo-600" />, "bg-indigo-500", "Margem Potencial")}
+        {renderSummaryCard("Alertas", metrics.lowStock, <AlertTriangle className="text-amber-600" />, "bg-amber-500", `${metrics.outOfStock} sem estoque`)}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredMaterials.map(material => (
-          <Card key={material.id} className="hover:shadow-md transition-shadow group">
-            <CardContent className="p-4 flex flex-col gap-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-gray-900">{material.name}</h3>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    {material.category}
-                  </span>
-                </div>
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                  <Package size={20} />
-                </div>
-              </div>
+      {/* Tabs & Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
+        <div className="flex p-1 bg-gray-100 rounded-lg w-full md:w-auto">
+          <button 
+            onClick={() => setActiveTab('products')}
+            className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex-1 md:flex-none", activeTab === 'products' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+          >
+            Produtos Acabados
+          </button>
+          <button 
+            onClick={() => setActiveTab('materials')}
+            className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex-1 md:flex-none", activeTab === 'materials' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+          >
+            Matérias-Primas
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex-1 md:flex-none", activeTab === 'history' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+          >
+            Histórico
+          </button>
+        </div>
 
-              <div className="mt-2">
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Quantidade em Estoque ({material.unit})</label>
-                
-                {editingId === material.id ? (
-                  <div className="flex gap-2">
-                    <DecimalInput 
-                      value={editValue} 
-                      onChange={setEditValue}
-                      className="h-9"
-                      autoFocus
-                    />
-                    <Button size="sm" onClick={() => handleSaveEdit(material)}>
-                      <Save size={16} />
-                    </Button>
-                  </div>
-                ) : (
-                  <div 
-                    className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-indigo-600 flex items-center gap-2"
-                    onClick={() => handleStartEdit(material.id, material.stockQuantity || 0)}
-                    title="Clique para editar"
-                  >
-                    {material.stockQuantity || 0} 
-                    <span className="text-sm font-normal text-gray-500">{material.unit}</span>
-                    <Edit2 size={14} className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" 
+              placeholder="Buscar item..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button variant="secondary" className="px-3">
+            <Filter size={16} />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden min-h-[400px]">
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Produto</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Categoria</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Estoque</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-right">Preço Venda</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-right">Custo Unit.</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredProducts.map(product => (
+                  <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                          {product.images?.[0] ? (
+                             <img src={product.images[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+                          ) : (
+                             product.name.substring(0, 2).toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{product.name}</div>
+                          <div className="text-xs text-gray-400">ID: {product.id.substring(0, 6)}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">{product.category}</td>
+                    <td className="px-6 py-4 text-center">
+                      {editingId === product.id ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <DecimalInput 
+                            value={editValue} 
+                            onChange={setEditValue}
+                            className="w-20 h-8 text-center"
+                            autoFocus
+                          />
+                          <button onClick={() => handleSaveProductEdit(product)} className="text-emerald-600 hover:bg-emerald-50 p-1 rounded">
+                            <Save size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleStartEdit(product.id, product.stockQuantity || 0)}
+                        >
+                          <span className={cn("font-bold", (product.stockQuantity || 0) <= 0 ? "text-red-500" : "text-gray-900")}>
+                            {product.stockQuantity || 0}
+                          </span>
+                          <Edit2 size={12} className="text-gray-300 opacity-0 group-hover:opacity-100" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right font-medium text-gray-900">{formatCurrency(product.finalPrice)}</td>
+                    <td className="px-6 py-4 text-right text-gray-500">{formatCurrency(product.unitCost)}</td>
+                    <td className="px-6 py-4 text-center">
+                      {(product.stockQuantity || 0) > 0 ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          Em Estoque
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Sem Estoque
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {filteredProducts.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      Nenhum produto encontrado.
+                    </td>
+                  </tr>
                 )}
-              </div>
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              {material.minStockLevel && (material.stockQuantity || 0) <= material.minStockLevel && (
-                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100 mt-1">
-                  <AlertTriangle size={14} />
-                  <span>Estoque baixo (Mín: {material.minStockLevel})</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-        
-        {filteredMaterials.length === 0 && (
-          <div className="col-span-full text-center py-10 text-gray-500">
-            Nenhum material encontrado.
+        {/* Materials Tab */}
+        {activeTab === 'materials' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Material</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Categoria</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Estoque</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Unidade</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-right">Custo Unit.</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredMaterials.map(material => (
+                  <tr key={material.id} className="hover:bg-gray-50/50 transition-colors group">
+                    <td className="px-6 py-4 font-medium text-gray-900">{material.name}</td>
+                    <td className="px-6 py-4 text-gray-500">{material.category}</td>
+                    <td className="px-6 py-4 text-center">
+                      {editingId === material.id ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <DecimalInput 
+                            value={editValue} 
+                            onChange={setEditValue}
+                            className="w-20 h-8 text-center"
+                            autoFocus
+                          />
+                          <button onClick={() => handleSaveMaterialEdit(material)} className="text-emerald-600 hover:bg-emerald-50 p-1 rounded">
+                            <Save size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleStartEdit(material.id, material.stockQuantity || 0)}
+                        >
+                          <span className={cn("font-bold", (material.stockQuantity || 0) <= (material.minStockLevel || 0) ? "text-amber-600" : "text-gray-900")}>
+                            {material.stockQuantity || 0}
+                          </span>
+                          <Edit2 size={12} className="text-gray-300 opacity-0 group-hover:opacity-100" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center text-gray-500">{material.unit}</td>
+                    <td className="px-6 py-4 text-right text-gray-500">{formatCurrency(material.unitCost)}</td>
+                    <td className="px-6 py-4 text-center">
+                      {(material.stockQuantity || 0) <= (material.minStockLevel || 0) ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                          <AlertTriangle size={10} /> Baixo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          OK
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Data</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Item</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Tipo</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Movimento</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Motivo</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700 text-center">Qtd.</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredHistory.map(movement => {
+                  const item = movement.itemType === 'material' 
+                    ? materials.find(m => m.id === movement.itemId) 
+                    : products.find(p => p.id === movement.itemId);
+                  
+                  return (
+                    <tr key={movement.id} className="hover:bg-gray-50/50">
+                      <td className="px-6 py-4 text-gray-500">
+                        {new Date(movement.date).toLocaleDateString()} <span className="text-xs opacity-70">{new Date(movement.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {item?.name || 'Item desconhecido'}
+                        <span className="ml-2 text-xs text-gray-400 border border-gray-200 px-1 rounded">
+                          {movement.itemType === 'material' ? 'Matéria-prima' : 'Produto'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {movement.type === 'entry' && <span className="text-emerald-600 flex items-center gap-1"><ArrowDownRight size={14} /> Entrada</span>}
+                        {movement.type === 'exit' && <span className="text-red-600 flex items-center gap-1"><ArrowUpRight size={14} /> Saída</span>}
+                        {movement.type === 'adjustment' && <span className="text-blue-600 flex items-center gap-1"><History size={14} /> Ajuste</span>}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">
+                        {movement.type === 'entry' ? '+' : movement.type === 'exit' ? '-' : ''}{movement.quantity}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">{movement.reason || '-'}</td>
+                      <td className="px-6 py-4 text-center">
+                        {/* Could show running balance if calculated */}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filteredHistory.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      Nenhum histórico encontrado.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

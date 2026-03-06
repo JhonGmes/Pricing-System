@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { Material, IndirectCost, Product, AppSettings, User, Category } from '../types';
+import { Material, IndirectCost, Product, AppSettings, User, Category, StockMovement } from '../types';
 import { storage } from './storage';
 
 // Helper to check if we should use Supabase (Configured AND Authenticated)
@@ -10,6 +10,169 @@ const shouldUseSupabase = async () => {
 };
 
 export const dataService = {
+  // ... existing methods ...
+
+  async getProducts(): Promise<Product[]> {
+    if (await shouldUseSupabase()) {
+      const { data, error } = await supabase!.from('products').select('*');
+      if (error) {
+        console.error('Error fetching products:', error);
+        return [];
+      }
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        description: item.description,
+        materials: item.materials || [],
+        indirectCosts: item.indirect_costs || [],
+        batchSize: Number(item.batch_size),
+        images: item.images || [],
+        totalBatchCost: Number(item.total_batch_cost),
+        unitCost: Number(item.unit_cost),
+        desiredMarginPercent: Number(item.desired_margin_percent),
+        fixedProfitAddon: Number(item.fixed_profit_addon),
+        finalPrice: Number(item.final_price),
+        stockQuantity: Number(item.stock_quantity || 0),
+        minStockLevel: item.min_stock_level ? Number(item.min_stock_level) : undefined,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
+    }
+    const products = await storage.getProducts();
+    return products.map(p => ({
+      ...p,
+      stockQuantity: p.stockQuantity || 0
+    }));
+  },
+
+  async addProduct(product: Product, allProducts: Product[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('products').insert([{
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        description: product.description,
+        materials: product.materials,
+        indirect_costs: product.indirectCosts,
+        batch_size: product.batchSize,
+        images: product.images,
+        total_batch_cost: product.totalBatchCost,
+        unit_cost: product.unitCost,
+        desired_margin_percent: product.desiredMarginPercent,
+        fixed_profit_addon: product.fixedProfitAddon,
+        final_price: product.finalPrice,
+        stock_quantity: product.stockQuantity,
+        min_stock_level: product.minStockLevel,
+        created_at: product.createdAt,
+        updated_at: product.updatedAt
+      }]);
+      if (error) console.error('Error adding product:', error);
+    } else {
+      storage.saveProducts(allProducts);
+    }
+  },
+
+  async updateProduct(product: Product, allProducts: Product[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('products').update({
+        name: product.name,
+        category: product.category,
+        description: product.description,
+        materials: product.materials,
+        indirect_costs: product.indirectCosts,
+        batch_size: product.batchSize,
+        images: product.images,
+        total_batch_cost: product.totalBatchCost,
+        unit_cost: product.unitCost,
+        desired_margin_percent: product.desiredMarginPercent,
+        fixed_profit_addon: product.fixedProfitAddon,
+        final_price: product.finalPrice,
+        stock_quantity: product.stockQuantity,
+        min_stock_level: product.minStockLevel,
+        updated_at: product.updatedAt
+      }).eq('id', product.id);
+      if (error) console.error('Error updating product:', error);
+    } else {
+      storage.saveProducts(allProducts);
+    }
+  },
+
+  async saveProducts(products: Product[]) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('products').upsert(
+        products.map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          description: p.description,
+          materials: p.materials,
+          indirect_costs: p.indirectCosts,
+          batch_size: p.batchSize,
+          images: p.images,
+          total_batch_cost: p.totalBatchCost,
+          unit_cost: p.unitCost,
+          desired_margin_percent: p.desiredMarginPercent,
+          fixed_profit_addon: p.fixedProfitAddon,
+          final_price: p.finalPrice,
+          stock_quantity: p.stockQuantity,
+          min_stock_level: p.minStockLevel,
+          created_at: p.createdAt,
+          updated_at: p.updatedAt
+        }))
+      );
+      if (error) console.error('Error saving products:', error);
+    } else {
+      storage.saveProducts(products);
+    }
+  },
+
+  // Stock Movements
+  async getStockMovements(): Promise<StockMovement[]> {
+    if (await shouldUseSupabase()) {
+      const { data, error } = await supabase!.from('stock_movements').select('*').order('date', { ascending: false });
+      if (error) {
+        console.error('Error fetching stock movements:', error);
+        return [];
+      }
+      return data.map((item: any) => ({
+        id: item.id,
+        itemId: item.item_id,
+        itemType: item.item_type,
+        type: item.type,
+        quantity: Number(item.quantity),
+        reason: item.reason,
+        date: item.date,
+        cost: item.cost ? Number(item.cost) : undefined,
+        price: item.price ? Number(item.price) : undefined,
+      }));
+    }
+    // Local storage fallback for movements (simplified, might not be fully implemented in storage.ts yet)
+    const movements = localStorage.getItem('stock_movements');
+    return movements ? JSON.parse(movements) : [];
+  },
+
+  async addStockMovement(movement: StockMovement) {
+    if (await shouldUseSupabase()) {
+      const { error } = await supabase!.from('stock_movements').insert([{
+        id: movement.id,
+        item_id: movement.itemId,
+        item_type: movement.itemType,
+        type: movement.type,
+        quantity: movement.quantity,
+        reason: movement.reason,
+        date: movement.date,
+        cost: movement.cost,
+        price: movement.price
+      }]);
+      if (error) console.error('Error adding stock movement:', error);
+    } else {
+      const movements = await this.getStockMovements();
+      movements.unshift(movement);
+      localStorage.setItem('stock_movements', JSON.stringify(movements));
+    }
+  },
+
   async getCategories(): Promise<Category[]> {
     if (await shouldUseSupabase()) {
       const { data, error } = await supabase!.from('categories').select('*');

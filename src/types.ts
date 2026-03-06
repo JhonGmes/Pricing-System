@@ -55,6 +55,22 @@ export interface Product {
   
   createdAt: string;
   updatedAt: string;
+  
+  // Inventory
+  stockQuantity?: number;
+  minStockLevel?: number;
+}
+
+export interface StockMovement {
+  id: string;
+  itemId: string; // Material ID or Product ID
+  itemType: 'material' | 'product';
+  type: 'entry' | 'exit' | 'adjustment';
+  quantity: number;
+  reason?: string; // e.g., "Purchase", "Production", "Sale", "Correction"
+  date: string;
+  cost?: number; // For entries (cost price)
+  price?: number; // For exits (selling price)
 }
 
 export interface AppSettings {
