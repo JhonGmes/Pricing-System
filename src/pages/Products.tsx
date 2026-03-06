@@ -107,81 +107,90 @@ export default function Products() {
   }, [formData.finalPrice, calculations.unitCost]);
 
   const handleSave = async () => {
-    if (!formData.name || !formData.batchSize) return;
+    if (!formData.name || !formData.batchSize) {
+      alert('Por favor, preencha o nome e o rendimento do produto.');
+      return;
+    }
 
-    const productData: Product = {
-      id: formData.id || generateId(),
-      createdAt: formData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...formData as any,
-      stockQuantity: formData.stockQuantity || 0,
-      minStockLevel: formData.minStockLevel || 5,
-      totalBatchCost: calculations.totalBatchCost,
-      unitCost: calculations.unitCost,
-    };
+    try {
+      const productData: Product = {
+        id: formData.id || generateId(),
+        createdAt: formData.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...formData as any,
+        stockQuantity: formData.stockQuantity || 0,
+        minStockLevel: formData.minStockLevel || 5,
+        totalBatchCost: calculations.totalBatchCost,
+        unitCost: calculations.unitCost,
+      };
 
-    if (formData.id) {
-      await updateProduct(productData);
-    } else {
-      await addProduct(productData);
+      if (formData.id) {
+        await updateProduct(productData);
+      } else {
+        await addProduct(productData);
 
-      const stockQty = formData.stockQuantity || 0;
-      const batchSize = formData.batchSize || 1;
-      
-      // 1. Log Product Entry (if stock > 0)
-      if (stockQty > 0) {
-        await addStockMovement({
-          id: crypto.randomUUID(),
-          itemId: productData.id,
-          itemType: 'product',
-          type: 'entry',
-          quantity: stockQty,
-          reason: 'Estoque Inicial (Criação)',
-          date: new Date().toISOString(),
-          cost: productData.unitCost,
-          price: productData.finalPrice
-        });
-      }
-
-      // 2. Deduct Materials (if requested and materials exist)
-      if (deductStock && formData.materials && formData.materials.length > 0 && stockQty > 0) {
-        const materialsToUpdate: any[] = [];
-        const batches = stockQty / batchSize;
+        const stockQty = formData.stockQuantity || 0;
+        const batchSize = formData.batchSize || 1;
         
-        for (const pm of formData.materials) {
-          const material = materials.find(m => m.id === pm.materialId);
-          if (material) {
-            // Calculate total needed: (stockQty / batchSize) * quantityUsedPerBatch
-            const totalQtyUsed = batches * pm.quantityUsed;
-            
-            const newStock = (material.stockQuantity || 0) - totalQtyUsed;
-            materialsToUpdate.push({
-              ...material,
-              stockQuantity: newStock
-            });
+        // 1. Log Product Entry (if stock > 0)
+        if (stockQty > 0) {
+          await addStockMovement({
+            id: crypto.randomUUID(),
+            itemId: productData.id,
+            itemType: 'product',
+            type: 'entry',
+            quantity: stockQty,
+            reason: 'Estoque Inicial (Criação)',
+            date: new Date().toISOString(),
+            cost: productData.unitCost,
+            price: productData.finalPrice
+          });
+        }
 
-            // Log Material Exit
-            await addStockMovement({
-              id: crypto.randomUUID(),
-              itemId: material.id,
-              itemType: 'material',
-              type: 'exit',
-              quantity: totalQtyUsed,
-              reason: `Produção Inicial: ${productData.name}`,
-              date: new Date().toISOString(),
-              cost: material.unitCost
-            });
+        // 2. Deduct Materials (if requested and materials exist)
+        if (deductStock && formData.materials && formData.materials.length > 0 && stockQty > 0) {
+          const materialsToUpdate: any[] = [];
+          const batches = stockQty / batchSize;
+          
+          for (const pm of formData.materials) {
+            const material = materials.find(m => m.id === pm.materialId);
+            if (material) {
+              // Calculate total needed: (stockQty / batchSize) * quantityUsedPerBatch
+              const totalQtyUsed = batches * pm.quantityUsed;
+              
+              const newStock = (material.stockQuantity || 0) - totalQtyUsed;
+              materialsToUpdate.push({
+                ...material,
+                stockQuantity: newStock
+              });
+
+              // Log Material Exit
+              await addStockMovement({
+                id: crypto.randomUUID(),
+                itemId: material.id,
+                itemType: 'material',
+                type: 'exit',
+                quantity: totalQtyUsed,
+                reason: `Produção Inicial: ${productData.name}`,
+                date: new Date().toISOString(),
+                cost: material.unitCost
+              });
+            }
+          }
+          
+          if (materialsToUpdate.length > 0) {
+            await updateMaterials(materialsToUpdate);
           }
         }
-        
-        if (materialsToUpdate.length > 0) {
-          await updateMaterials(materialsToUpdate);
-        }
       }
+      
+      setView('list');
+      setFormData(initialFormState);
+      setDeductStock(true);
+    } catch (error) {
+      console.error("Erro ao salvar produto:", error);
+      alert("Erro ao salvar produto. Verifique se o armazenamento está cheio ou tente novamente.");
     }
-    setView('list');
-    setFormData(initialFormState);
-    setDeductStock(true);
   };
 
   const handleEdit = (product: Product) => {

@@ -15,11 +15,16 @@ export default function Settings() {
     setFormData(settings);
   }, [settings]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSettings(formData);
-    // Could add a toast here
-    alert('Configurações salvas com sucesso!');
+    try {
+      await updateSettings(formData);
+      // Could add a toast here
+      alert('Configurações salvas com sucesso!');
+    } catch (error) {
+      console.error("Erro ao salvar configurações:", error);
+      alert("Erro ao salvar configurações. Tente novamente.");
+    }
   };
 
   const handleExport = () => {

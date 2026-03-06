@@ -39,7 +39,7 @@ export default function Materials() {
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const quantity = parseNumber(formData.quantityBought);
@@ -48,17 +48,36 @@ export default function Materials() {
     const stockQuantity = parseNumber(formData.stockQuantity);
     const minStockLevel = parseNumber(formData.minStockLevel);
     
-    if (isEditing && formData.id) {
-      // Update existing
-      const existing = materials.find(m => m.id === formData.id);
-      if (existing) {
-        const history = [...existing.history];
-        if (Math.abs(existing.unitCost - unitCost) > 0.0001) {
-          history.push({ date: new Date().toISOString(), price: existing.unitCost });
+    try {
+      if (isEditing && formData.id) {
+        // Update existing
+        const existing = materials.find(m => m.id === formData.id);
+        if (existing) {
+          const history = [...existing.history];
+          if (Math.abs(existing.unitCost - unitCost) > 0.0001) {
+            history.push({ date: new Date().toISOString(), price: existing.unitCost });
+          }
+          
+          await updateMaterial({
+            ...existing,
+            name: formData.name,
+            category: formData.category,
+            supplier: formData.supplier,
+            unit: formData.unit,
+            quantityBought: quantity,
+            pricePaid: price,
+            unitCost,
+            stockQuantity,
+            minStockLevel,
+            history
+          });
         }
-        
-        updateMaterial({
-          ...existing,
+      } else {
+        // Create new
+        await addMaterial({
+          id: generateId(),
+          createdAt: new Date().toISOString(),
+          history: [],
           name: formData.name,
           category: formData.category,
           supplier: formData.supplier,
@@ -66,30 +85,16 @@ export default function Materials() {
           quantityBought: quantity,
           pricePaid: price,
           unitCost,
-          stockQuantity,
-          minStockLevel,
-          history
-        });
+          stockQuantity: stockQuantity || quantity, // Default to quantity bought if not specified
+          minStockLevel: minStockLevel || 5,
+        } as Material);
       }
-    } else {
-      // Create new
-      addMaterial({
-        id: generateId(),
-        createdAt: new Date().toISOString(),
-        history: [],
-        name: formData.name,
-        category: formData.category,
-        supplier: formData.supplier,
-        unit: formData.unit,
-        quantityBought: quantity,
-        pricePaid: price,
-        unitCost,
-        stockQuantity: stockQuantity || quantity, // Default to quantity bought if not specified
-        minStockLevel: minStockLevel || 5,
-      } as Material);
+      
+      closeModal();
+    } catch (error) {
+      console.error("Erro ao salvar material:", error);
+      alert("Erro ao salvar material. Tente novamente.");
     }
-    
-    closeModal();
   };
 
   const openNewModal = () => {

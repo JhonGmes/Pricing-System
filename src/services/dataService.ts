@@ -74,7 +74,7 @@ export const dataService = {
       }]);
       if (error) console.error('Error adding product:', error);
     } else {
-      storage.saveProducts(allProducts);
+      await storage.saveProducts(allProducts);
     }
   },
 
@@ -101,7 +101,7 @@ export const dataService = {
       }).eq('id', product.id);
       if (error) console.error('Error updating product:', error);
     } else {
-      storage.saveProducts(allProducts);
+      await storage.saveProducts(allProducts);
     }
   },
 
@@ -132,7 +132,7 @@ export const dataService = {
       );
       if (error) console.error('Error saving products:', error);
     } else {
-      storage.saveProducts(products);
+      await storage.saveProducts(products);
     }
   },
 
@@ -194,7 +194,7 @@ export const dataService = {
         name: item.name
       }));
     }
-    return storage.getCategories();
+    return await storage.getCategories();
   },
 
   async addCategory(category: Category, allCategories: Category[]) {
@@ -205,7 +205,7 @@ export const dataService = {
       }]);
       if (error) console.error('Error adding category:', error);
     } else {
-      storage.saveCategories(allCategories);
+      await storage.saveCategories(allCategories);
     }
   },
 
@@ -216,7 +216,7 @@ export const dataService = {
       }).eq('id', category.id);
       if (error) console.error('Error updating category:', error);
     } else {
-      storage.saveCategories(allCategories);
+      await storage.saveCategories(allCategories);
     }
   },
 
@@ -225,7 +225,7 @@ export const dataService = {
       const { error } = await supabase!.from('categories').delete().eq('id', id);
       if (error) console.error('Error deleting category:', error);
     } else {
-      storage.saveCategories(allCategories);
+      await storage.saveCategories(allCategories);
     }
   },
 
@@ -239,7 +239,7 @@ export const dataService = {
       );
       if (error) console.error('Error saving categories:', error);
     } else {
-      storage.saveCategories(categories);
+      await storage.saveCategories(categories);
     }
   },
 
@@ -290,7 +290,7 @@ export const dataService = {
       }]);
       if (error) console.error('Error adding material:', error);
     } else {
-      storage.saveMaterials(allMaterials);
+      await storage.saveMaterials(allMaterials);
     }
   },
 
@@ -311,7 +311,7 @@ export const dataService = {
       }).eq('id', material.id);
       if (error) console.error('Error updating material:', error);
     } else {
-      storage.saveMaterials(allMaterials);
+      await storage.saveMaterials(allMaterials);
     }
   },
 
@@ -337,7 +337,7 @@ export const dataService = {
       );
       if (error) console.error('Error saving materials:', error);
     } else {
-      storage.saveMaterials(materials);
+      await storage.saveMaterials(materials);
     }
   },
 
@@ -346,7 +346,7 @@ export const dataService = {
       const { error } = await supabase!.from('materials').delete().eq('id', id);
       if (error) console.error('Error deleting material:', error);
     } else {
-      storage.saveMaterials(allMaterials);
+      await storage.saveMaterials(allMaterials);
     }
   },
 
@@ -364,7 +364,7 @@ export const dataService = {
         amount: Number(item.amount)
       }));
     }
-    return storage.getIndirectCosts();
+    return await storage.getIndirectCosts();
   },
 
   async addIndirectCost(cost: IndirectCost, allCosts: IndirectCost[]) {
@@ -377,7 +377,7 @@ export const dataService = {
       }]);
       if (error) console.error('Error adding indirect cost:', error);
     } else {
-      storage.saveIndirectCosts(allCosts);
+      await storage.saveIndirectCosts(allCosts);
     }
   },
 
@@ -390,7 +390,7 @@ export const dataService = {
       }).eq('id', cost.id);
       if (error) console.error('Error updating indirect cost:', error);
     } else {
-      storage.saveIndirectCosts(allCosts);
+      await storage.saveIndirectCosts(allCosts);
     }
   },
 
@@ -406,7 +406,7 @@ export const dataService = {
       );
       if (error) console.error('Error saving indirect costs:', error);
     } else {
-      storage.saveIndirectCosts(costs);
+      await storage.saveIndirectCosts(costs);
     }
   },
 
@@ -415,119 +415,17 @@ export const dataService = {
       const { error } = await supabase!.from('indirect_costs').delete().eq('id', id);
       if (error) console.error('Error deleting indirect cost:', error);
     } else {
-      storage.saveIndirectCosts(allCosts);
+      await storage.saveIndirectCosts(allCosts);
     }
   },
 
-  async getProducts(): Promise<Product[]> {
-    if (await shouldUseSupabase()) {
-      const { data, error } = await supabase!.from('products').select('*');
-      if (error) {
-        console.error('Error fetching products:', error);
-        return [];
-      }
-      return data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        description: item.description,
-        materials: item.materials || [],
-        indirectCosts: item.indirect_costs || [],
-        batchSize: Number(item.batch_size),
-        images: item.images || [],
-        totalBatchCost: Number(item.total_batch_cost),
-        unitCost: Number(item.unit_cost),
-        desiredMarginPercent: Number(item.desired_margin_percent),
-        fixedProfitAddon: Number(item.fixed_profit_addon),
-        finalPrice: Number(item.final_price),
-        createdAt: item.created_at,
-        updatedAt: item.updated_at
-      }));
-    }
-    return storage.getProducts();
-  },
-
-  async addProduct(product: Product, allProducts: Product[]) {
-    if (await shouldUseSupabase()) {
-      const { error } = await supabase!.from('products').insert([{
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        description: product.description,
-        materials: product.materials,
-        indirect_costs: product.indirectCosts,
-        batch_size: product.batchSize,
-        images: product.images,
-        total_batch_cost: product.totalBatchCost,
-        unit_cost: product.unitCost,
-        desired_margin_percent: product.desiredMarginPercent,
-        fixed_profit_addon: product.fixedProfitAddon,
-        final_price: product.finalPrice,
-        created_at: product.createdAt,
-        updated_at: product.updatedAt
-      }]);
-      if (error) console.error('Error adding product:', error);
-    } else {
-      storage.saveProducts(allProducts);
-    }
-  },
-
-  async updateProduct(product: Product, allProducts: Product[]) {
-    if (await shouldUseSupabase()) {
-      const { error } = await supabase!.from('products').update({
-        name: product.name,
-        category: product.category,
-        description: product.description,
-        materials: product.materials,
-        indirect_costs: product.indirectCosts,
-        batch_size: product.batchSize,
-        images: product.images,
-        total_batch_cost: product.totalBatchCost,
-        unit_cost: product.unitCost,
-        desired_margin_percent: product.desiredMarginPercent,
-        fixed_profit_addon: product.fixedProfitAddon,
-        final_price: product.finalPrice,
-        updated_at: product.updatedAt
-      }).eq('id', product.id);
-      if (error) console.error('Error updating product:', error);
-    } else {
-      storage.saveProducts(allProducts);
-    }
-  },
-
-  async saveProducts(products: Product[]) {
-    if (await shouldUseSupabase()) {
-      const { error } = await supabase!.from('products').upsert(
-        products.map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          description: p.description,
-          materials: p.materials,
-          indirect_costs: p.indirectCosts,
-          batch_size: p.batchSize,
-          images: p.images,
-          total_batch_cost: p.totalBatchCost,
-          unit_cost: p.unitCost,
-          desired_margin_percent: p.desiredMarginPercent,
-          fixed_profit_addon: p.fixedProfitAddon,
-          final_price: p.finalPrice,
-          created_at: p.createdAt,
-          updated_at: p.updatedAt
-        }))
-      );
-      if (error) console.error('Error saving products:', error);
-    } else {
-      storage.saveProducts(products);
-    }
-  },
 
   async deleteProduct(id: string, allProducts: Product[]) {
     if (await shouldUseSupabase()) {
       const { error } = await supabase!.from('products').delete().eq('id', id);
       if (error) console.error('Error deleting product:', error);
     } else {
-      storage.saveProducts(allProducts);
+      await storage.saveProducts(allProducts);
     }
   },
 
@@ -547,7 +445,7 @@ export const dataService = {
         };
       }
     }
-    return storage.getSettings();
+    return await storage.getSettings();
   },
 
   async saveSettings(settings: AppSettings) {
@@ -573,7 +471,7 @@ export const dataService = {
         await supabase!.from('settings').insert([payload]);
       }
     } else {
-      storage.saveSettings(settings);
+      await storage.saveSettings(settings);
     }
   }
 };

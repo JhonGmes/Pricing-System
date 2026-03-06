@@ -68,96 +68,106 @@ export default function Inventory() {
   };
 
   const handleSaveMaterialEdit = async (material: any) => {
-    const diff = editValue - (material.stockQuantity || 0);
-    if (diff !== 0) {
-      await updateMaterial({
-        ...material,
-        stockQuantity: editValue
-      });
-      
-      // Log movement
-      await addStockMovement({
-        id: crypto.randomUUID(),
-        itemId: material.id,
-        itemType: 'material',
-        type: diff > 0 ? 'adjustment' : 'adjustment', // Could be entry/exit if we had more context
-        quantity: Math.abs(diff),
-        reason: 'Ajuste manual de estoque',
-        date: new Date().toISOString(),
-      });
+    try {
+      const diff = editValue - (material.stockQuantity || 0);
+      if (diff !== 0) {
+        await updateMaterial({
+          ...material,
+          stockQuantity: editValue
+        });
+        
+        // Log movement
+        await addStockMovement({
+          id: crypto.randomUUID(),
+          itemId: material.id,
+          itemType: 'material',
+          type: diff > 0 ? 'adjustment' : 'adjustment', // Could be entry/exit if we had more context
+          quantity: Math.abs(diff),
+          reason: 'Ajuste manual de estoque',
+          date: new Date().toISOString(),
+        });
+      }
+      setEditingId(null);
+    } catch (error) {
+      console.error("Erro ao salvar ajuste de estoque:", error);
+      alert("Erro ao salvar ajuste. Tente novamente.");
     }
-    setEditingId(null);
   };
 
   const handleSaveProductEdit = async (product: any) => {
-    const oldStock = product.stockQuantity || 0;
-    const newStock = editValue;
-    const diff = newStock - oldStock;
+    try {
+      const oldStock = product.stockQuantity || 0;
+      const newStock = editValue;
+      const diff = newStock - oldStock;
 
-    if (diff !== 0) {
-      // 1. Update Product Stock
-      await updateProduct({
-        ...product,
-        stockQuantity: newStock
-      });
+      if (diff !== 0) {
+        // 1. Update Product Stock
+        await updateProduct({
+          ...product,
+          stockQuantity: newStock
+        });
 
-      // Log product movement
-      await addStockMovement({
-        id: crypto.randomUUID(),
-        itemId: product.id,
-        itemType: 'product',
-        type: diff > 0 ? 'entry' : 'exit', // Positive diff means we added stock (entry/production)
-        quantity: Math.abs(diff),
-        reason: diff > 0 ? 'Produção / Entrada Manual' : 'Venda / Saída Manual',
-        date: new Date().toISOString(),
-        cost: product.unitCost,
-        price: product.finalPrice
-      });
+        // Log product movement
+        await addStockMovement({
+          id: crypto.randomUUID(),
+          itemId: product.id,
+          itemType: 'product',
+          type: diff > 0 ? 'entry' : 'exit', // Positive diff means we added stock (entry/production)
+          quantity: Math.abs(diff),
+          reason: diff > 0 ? 'Produção / Entrada Manual' : 'Venda / Saída Manual',
+          date: new Date().toISOString(),
+          cost: product.unitCost,
+          price: product.finalPrice
+        });
 
-      // 2. Deduct Materials (Only if producing/adding stock)
-      // The user requested: "when I create a product... deducted from raw material"
-      // This implies production logic.
-      if (diff > 0 && product.materials && product.materials.length > 0) {
-        const materialsToUpdate: any[] = [];
-        
-        // We need to fetch the latest material states to ensure accuracy, 
-        // but for now we use the context 'materials' which should be up to date.
-        
-        for (const pm of product.materials) {
-          const material = materials.find(m => m.id === pm.materialId);
-          if (material) {
-            const qtyUsed = pm.quantityUsed * diff; // Total needed for this batch
-            const newMatStock = (material.stockQuantity || 0) - qtyUsed;
-            
-            materialsToUpdate.push({
-              ...material,
-              stockQuantity: newMatStock
-            });
+        // 2. Deduct Materials (Only if producing/adding stock)
+        // The user requested: "when I create a product... deducted from raw material"
+        // This implies production logic.
+        if (diff > 0 && product.materials && product.materials.length > 0) {
+          const materialsToUpdate: any[] = [];
+          
+          // We need to fetch the latest material states to ensure accuracy, 
+          // but for now we use the context 'materials' which should be up to date.
+          
+          for (const pm of product.materials) {
+            const material = materials.find(m => m.id === pm.materialId);
+            if (material) {
+              const qtyUsed = pm.quantityUsed * diff; // Total needed for this batch
+              const newMatStock = (material.stockQuantity || 0) - qtyUsed;
+              
+              materialsToUpdate.push({
+                ...material,
+                stockQuantity: newMatStock
+              });
 
-            // Log material movement
-            await addStockMovement({
-              id: crypto.randomUUID(),
-              itemId: material.id,
-              itemType: 'material',
-              type: 'exit', // Used in production
-              quantity: qtyUsed,
-              reason: `Produção: ${product.name}`,
-              date: new Date().toISOString(),
-              cost: material.unitCost
-            });
+              // Log material movement
+              await addStockMovement({
+                id: crypto.randomUUID(),
+                itemId: material.id,
+                itemType: 'material',
+                type: 'exit', // Used in production
+                quantity: qtyUsed,
+                reason: `Produção: ${product.name}`,
+                date: new Date().toISOString(),
+                cost: material.unitCost
+              });
+            }
+          }
+
+          if (materialsToUpdate.length > 0) {
+            // We need a way to update multiple materials at once to avoid flicker/race conditions
+            // Assuming AppContext has updateMaterials (plural)
+            // If not, we loop updateMaterial. 
+            // Checking AppContext... yes, it has updateMaterials.
+             await updateMaterials(materialsToUpdate);
           }
         }
-
-        if (materialsToUpdate.length > 0) {
-          // We need a way to update multiple materials at once to avoid flicker/race conditions
-          // Assuming AppContext has updateMaterials (plural)
-          // If not, we loop updateMaterial. 
-          // Checking AppContext... yes, it has updateMaterials.
-           await updateMaterials(materialsToUpdate);
-        }
       }
+      setEditingId(null);
+    } catch (error) {
+      console.error("Erro ao salvar ajuste de estoque:", error);
+      alert("Erro ao salvar ajuste. Tente novamente.");
     }
-    setEditingId(null);
   };
 
   const handleToggleActive = async (product: any) => {

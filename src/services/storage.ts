@@ -1,3 +1,4 @@
+import { get, set } from 'idb-keyval';
 import { Material, IndirectCost, Product, AppSettings, User } from '../types';
 
 const STORAGE_KEYS = {
@@ -10,41 +11,81 @@ const STORAGE_KEYS = {
 };
 
 export const storage = {
-  getCategories: (): { id: string; name: string }[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    return data ? JSON.parse(data) : [];
+  getCategories: async (): Promise<{ id: string; name: string }[]> => {
+    const data = await get(STORAGE_KEYS.CATEGORIES);
+    if (data) return data;
+    
+    const lsData = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.CATEGORIES, parsed);
+      return parsed;
+    }
+    return [];
   },
-  saveCategories: (categories: { id: string; name: string }[]) => {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
-  },
-
-  getMaterials: (): Material[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.MATERIALS);
-    return data ? JSON.parse(data) : [];
-  },
-  saveMaterials: (materials: Material[]) => {
-    localStorage.setItem(STORAGE_KEYS.MATERIALS, JSON.stringify(materials));
-  },
-
-  getIndirectCosts: (): IndirectCost[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.INDIRECT_COSTS);
-    return data ? JSON.parse(data) : [];
-  },
-  saveIndirectCosts: (costs: IndirectCost[]) => {
-    localStorage.setItem(STORAGE_KEYS.INDIRECT_COSTS, JSON.stringify(costs));
+  saveCategories: async (categories: { id: string; name: string }[]) => {
+    await set(STORAGE_KEYS.CATEGORIES, categories);
   },
 
-  getProducts: (): Product[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    return data ? JSON.parse(data) : [];
+  getMaterials: async (): Promise<Material[]> => {
+    const data = await get(STORAGE_KEYS.MATERIALS);
+    if (data) return data;
+
+    const lsData = localStorage.getItem(STORAGE_KEYS.MATERIALS);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.MATERIALS, parsed);
+      return parsed;
+    }
+    return [];
   },
-  saveProducts: (products: Product[]) => {
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+  saveMaterials: async (materials: Material[]) => {
+    await set(STORAGE_KEYS.MATERIALS, materials);
   },
 
-  getSettings: (): AppSettings => {
-    const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return data ? JSON.parse(data) : {
+  getIndirectCosts: async (): Promise<IndirectCost[]> => {
+    const data = await get(STORAGE_KEYS.INDIRECT_COSTS);
+    if (data) return data;
+
+    const lsData = localStorage.getItem(STORAGE_KEYS.INDIRECT_COSTS);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.INDIRECT_COSTS, parsed);
+      return parsed;
+    }
+    return [];
+  },
+  saveIndirectCosts: async (costs: IndirectCost[]) => {
+    await set(STORAGE_KEYS.INDIRECT_COSTS, costs);
+  },
+
+  getProducts: async (): Promise<Product[]> => {
+    const data = await get(STORAGE_KEYS.PRODUCTS);
+    if (data) return data;
+
+    const lsData = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.PRODUCTS, parsed);
+      return parsed;
+    }
+    return [];
+  },
+  saveProducts: async (products: Product[]) => {
+    await set(STORAGE_KEYS.PRODUCTS, products);
+  },
+
+  getSettings: async (): Promise<AppSettings> => {
+    const data = await get(STORAGE_KEYS.SETTINGS);
+    if (data) return data;
+
+    const lsData = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.SETTINGS, parsed);
+      return parsed;
+    }
+    return {
       brandName: 'Centelha de Amor',
       subtitle: 'Artesanatos com Amor',
       logo: null,
@@ -52,15 +93,23 @@ export const storage = {
       defaultFixedCost: 0,
     };
   },
-  saveSettings: (settings: AppSettings) => {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+  saveSettings: async (settings: AppSettings) => {
+    await set(STORAGE_KEYS.SETTINGS, settings);
   },
 
-  getUser: (): User => {
-    const data = localStorage.getItem(STORAGE_KEYS.USER);
-    return data ? JSON.parse(data) : { name: '', email: '', isAuthenticated: false };
+  getUser: async (): Promise<User> => {
+    const data = await get(STORAGE_KEYS.USER);
+    if (data) return data;
+
+    const lsData = localStorage.getItem(STORAGE_KEYS.USER);
+    if (lsData) {
+      const parsed = JSON.parse(lsData);
+      await set(STORAGE_KEYS.USER, parsed);
+      return parsed;
+    }
+    return { name: '', email: '', isAuthenticated: false };
   },
-  saveUser: (user: User) => {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+  saveUser: async (user: User) => {
+    await set(STORAGE_KEYS.USER, user);
   },
 };

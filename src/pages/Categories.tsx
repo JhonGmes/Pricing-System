@@ -19,21 +19,26 @@ export default function Categories() {
   const [formData, setFormData] = useState<Partial<Category>>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isEditing && formData.id) {
-      // Update existing
-      updateCategory(formData as Category);
-    } else {
-      // Create new
-      addCategory({
-        id: generateId(),
-        ...formData as Omit<Category, 'id'>,
-      } as Category);
+    try {
+      if (isEditing && formData.id) {
+        // Update existing
+        await updateCategory(formData as Category);
+      } else {
+        // Create new
+        await addCategory({
+          id: generateId(),
+          ...formData as Omit<Category, 'id'>,
+        } as Category);
+      }
+      
+      closeModal();
+    } catch (error) {
+      console.error("Erro ao salvar categoria:", error);
+      alert("Erro ao salvar categoria. Tente novamente.");
     }
-    
-    closeModal();
   };
 
   const openNewModal = () => {

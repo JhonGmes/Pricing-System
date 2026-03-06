@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Material, IndirectCost, Product, AppSettings, User, Category } from '../types';
+import { Material, IndirectCost, Product, AppSettings, User, Category, StockMovement } from '../types';
 import { storage } from '../services/storage';
 import { dataService } from '../services/dataService';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
