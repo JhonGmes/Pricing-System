@@ -20,6 +20,11 @@
     display: block;
   }
 
+  /* Explicitly hide elements with no-print class */
+  .no-print, .print\:hidden {
+    display: none !important;
+  }
+
   /* Reset layout containers for print */
   .min-h-screen, 
   .h-screen, 
@@ -33,7 +38,7 @@
     min-height: 0 !important;
   }
 
-  /* Hide sidebar and header explicitly (redundant but safe) */
+  /* Hide sidebar and header explicitly */
   aside, header {
     display: none !important;
   }

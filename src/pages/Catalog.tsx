@@ -72,7 +72,7 @@ export default function Catalog() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Catálogo Digital</h2>
           <p className="text-gray-500">Visualize e exporte seu portfólio.</p>
@@ -177,32 +177,41 @@ export default function Catalog() {
                 >
                   {pageProducts.map((product) => (
                     <div key={product.id} className="break-inside-avoid h-full">
-                      <div className="bg-white p-4 rounded-xl shadow-sm h-full flex flex-col">
-                        <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-3 relative">
+                      <div 
+                        className="p-4 rounded-xl shadow-sm h-full flex flex-col"
+                        style={{ backgroundColor: '#ffffff' }}
+                      >
+                        <div 
+                          className="aspect-square w-full rounded-lg overflow-hidden mb-3 relative"
+                          style={{ backgroundColor: '#f9fafb' }}
+                        >
                           {product.images?.[0] ? (
                             <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                            <div className="w-full h-full flex items-center justify-center text-gray-300" style={{ backgroundColor: '#f3f4f6', color: '#d1d5db' }}>
                               <ImageIcon size={32} />
                             </div>
                           )}
                           {catalogSettings.showCode && product.code && (
-                             <span className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-mono rounded-sm shadow-sm text-gray-800">
+                             <span 
+                               className="absolute top-2 left-2 px-2 py-1 text-[10px] font-mono rounded-sm shadow-sm"
+                               style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#1f2937' }}
+                             >
                                #{product.code}
                              </span>
                           )}
                         </div>
                         <div className="text-center space-y-1 mt-auto">
-                          <h3 className="font-serif font-bold text-lg leading-tight text-gray-900">
+                          <h3 className="font-serif font-bold text-lg leading-tight" style={{ color: '#111827' }}>
                             {product.name}
                           </h3>
                           {catalogSettings.showDescription && (
-                            <p className="text-xs text-gray-500 line-clamp-2 px-1">
+                            <p className="text-xs line-clamp-2 px-1" style={{ color: '#6b7280' }}>
                               {product.description}
                             </p>
                           )}
                           {catalogSettings.showPrice && (
-                            <p className="font-bold text-lg mt-2 text-indigo-900">
+                            <p className="font-bold text-lg mt-2" style={{ color: '#312e81' }}>
                               {formatCurrency(product.finalPrice)}
                             </p>
                           )}
