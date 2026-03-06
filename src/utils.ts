@@ -12,6 +12,15 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+export function formatUnitCost(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  }).format(value);
+}
+
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }

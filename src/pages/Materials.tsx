@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Material } from '../types';
-import { generateId, formatCurrency } from '../utils';
+import { generateId, formatCurrency, formatUnitCost } from '../utils';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import { Plus, Trash2, Edit2, Search, AlertCircle } from 'lucide-react';
 import { Modal } from '../components/Modal';
+
+interface FormState {
+  id?: string;
+  name: string;
+  category: string;
+  supplier: string;
+  unit: 'kg' | 'g' | 'ml' | 'l' | 'un' | 'cm' | 'm';
+  quantityBought: string;
+  pricePaid: string;
+}
 
 export default function Materials() {
   const { materials, addMaterial, updateMaterial, deleteMaterial } = useApp();
@@ -14,34 +24,52 @@ export default function Materials() {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Form State
-  const initialFormState: Partial<Material> = {
+  const initialFormState: FormState = {
     name: '',
     category: '',
     supplier: '',
     unit: 'kg',
-    quantityBought: 0,
-    pricePaid: 0,
+    quantityBought: '',
+    pricePaid: '',
   };
-  const [formData, setFormData] = useState<Partial<Material>>(initialFormState);
+  const [formData, setFormData] = useState<FormState>(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
+
+  const parseNumber = (value: string) => {
+    if (!value) return 0;
+    // If value has a comma, assume it's the decimal separator (PT-BR)
+    // Remove dots (thousand separators) and replace comma with dot
+    if (value.includes(',')) {
+      return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    }
+    // Otherwise, assume dot is the decimal separator (or just a number)
+    return parseFloat(value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const unitCost = (formData.pricePaid || 0) / (formData.quantityBought || 1);
+    const quantity = parseNumber(formData.quantityBought);
+    const price = parseNumber(formData.pricePaid);
+    const unitCost = price / (quantity || 1);
     
     if (isEditing && formData.id) {
       // Update existing
       const existing = materials.find(m => m.id === formData.id);
       if (existing) {
         const history = [...existing.history];
-        if (Math.abs(existing.unitCost - unitCost) > 0.01) {
+        if (Math.abs(existing.unitCost - unitCost) > 0.0001) {
           history.push({ date: new Date().toISOString(), price: existing.unitCost });
         }
         
         updateMaterial({
           ...existing,
-          ...formData as Material,
+          name: formData.name,
+          category: formData.category,
+          supplier: formData.supplier,
+          unit: formData.unit,
+          quantityBought: quantity,
+          pricePaid: price,
           unitCost,
           history
         });
@@ -52,7 +80,12 @@ export default function Materials() {
         id: generateId(),
         createdAt: new Date().toISOString(),
         history: [],
-        ...formData as Omit<Material, 'id' | 'createdAt' | 'history' | 'unitCost'>,
+        name: formData.name,
+        category: formData.category,
+        supplier: formData.supplier,
+        unit: formData.unit,
+        quantityBought: quantity,
+        pricePaid: price,
         unitCost,
       } as Material);
     }
@@ -67,7 +100,15 @@ export default function Materials() {
   };
 
   const openEditModal = (material: Material) => {
-    setFormData(material);
+    setFormData({
+      id: material.id,
+      name: material.name,
+      category: material.category,
+      supplier: material.supplier || '',
+      unit: material.unit,
+      quantityBought: material.quantityBought.toString().replace('.', ','),
+      pricePaid: material.pricePaid.toString().replace('.', ','),
+    });
     setIsEditing(true);
     setIsModalOpen(true);
   };
@@ -90,7 +131,9 @@ export default function Materials() {
     (m.supplier && m.supplier.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const calculatedUnitCost = (formData.pricePaid || 0) / (formData.quantityBought || 1);
+  const quantity = parseNumber(formData.quantityBought);
+  const price = parseNumber(formData.pricePaid);
+  const calculatedUnitCost = price / (quantity || 1);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -147,7 +190,7 @@ export default function Materials() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-[#D97706]">
-                      {formatCurrency(material.unitCost)} <span className="text-gray-400 font-normal text-xs">/{material.unit}</span>
+                      {formatUnitCost(material.unitCost)} <span className="text-gray-400 font-normal text-xs">/{material.unit}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -226,20 +269,20 @@ export default function Materials() {
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Quantidade Total Compra"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.quantityBought || ''}
-              onChange={e => setFormData({...formData, quantityBought: parseFloat(e.target.value)})}
+              type="text"
+              inputMode="decimal"
+              placeholder="0,00"
+              value={formData.quantityBought}
+              onChange={e => setFormData({...formData, quantityBought: e.target.value})}
               required
             />
             <Input
               label="Preço Total Pago (R$)"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.pricePaid || ''}
-              onChange={e => setFormData({...formData, pricePaid: parseFloat(e.target.value)})}
+              type="text"
+              inputMode="decimal"
+              placeholder="0,00"
+              value={formData.pricePaid}
+              onChange={e => setFormData({...formData, pricePaid: e.target.value})}
               required
             />
           </div>
@@ -249,10 +292,10 @@ export default function Materials() {
             <div>
               <p className="text-sm font-bold text-amber-900">Cálculo Automático:</p>
               <p className="text-sm text-amber-800 mt-1">
-                Custo Unitário = {formatCurrency(formData.pricePaid || 0)} ÷ {formData.quantityBought || 1}
+                Custo Unitário = {formatCurrency(price)} ÷ {quantity}
               </p>
               <p className="text-lg font-bold text-amber-700 mt-1">
-                = {formatCurrency(calculatedUnitCost)} / {formData.unit}
+                = {formatUnitCost(calculatedUnitCost)} / {formData.unit}
               </p>
             </div>
           </div>
