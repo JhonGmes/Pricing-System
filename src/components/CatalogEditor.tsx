@@ -374,17 +374,54 @@ export function CatalogEditor() {
               </div>
             ) : (
               // Page Preview
-              <div className="h-full flex flex-col p-12 relative">
-                {/* Header */}
-                <div className="flex justify-between items-end border-b pb-4 mb-8" style={{ borderColor: `${localSettings.primaryColor}30` }}>
-                  <div>
-                    <h2 className="text-3xl font-serif font-bold" style={{ color: localSettings.primaryColor }}>
-                      {localSettings.headerText || 'Título da Página'}
+              <div className="h-full flex flex-col p-12 relative" style={{ backgroundColor: '#efedec' }}>
+                {/* Top Left Decoration (Reused from Cover) */}
+                {localSettings.coverImageTopLeft && (
+                  <img 
+                    src={localSettings.coverImageTopLeft} 
+                    alt="Corner Decoration" 
+                    className="absolute top-4 left-4 w-32 h-auto opacity-80"
+                  />
+                )}
+
+                {/* Page Header */}
+                <div className="flex justify-between items-start mb-8 relative z-10 mt-4">
+                  <div className="flex flex-col items-start">
+                    {/* Brand Name */}
+                    <h1 
+                      className="text-4xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
+                    >
+                      {settings.brandName}
+                    </h1>
+                    {/* Slogan */}
+                    <p 
+                      className="text-sm font-serif tracking-widest mt-0 mb-4"
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
+                    >
+                      {settings.subtitle}
+                    </p>
+                    
+                    {/* Category Name */}
+                    <h2 
+                      className="text-xl font-serif font-bold uppercase tracking-wider" 
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '4px solid #efc26c', paddingLeft: '12px' }}
+                    >
+                      {localSettings.headerText || 'Categoria'}
                     </h2>
-                    <p className="text-sm opacity-70">Categoria Exemplo</p>
                   </div>
-                  <div className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: localSettings.primaryColor }}>
-                    <span className="font-serif font-bold">L</span>
+
+                  {/* Logo Top Right */}
+                  <div className="flex items-center justify-center">
+                     {(localSettings.logo || settings.logo) && (
+                       <div className="p-1 rounded-full border-2 border-[#efc26c] bg-white shadow-sm">
+                         <img 
+                           src={localSettings.logo || settings.logo!} 
+                           alt="Logo" 
+                           className="h-20 w-20 object-contain rounded-full" 
+                         />
+                       </div>
+                     )}
                   </div>
                 </div>
 
@@ -394,11 +431,11 @@ export function CatalogEditor() {
                   alignContent: 'start'
                 }}>
                   {[...Array(localSettings.productsPerPage)].map((_, i) => (
-                    <div key={i} className="bg-white p-3 rounded-xl shadow-sm flex flex-col h-full">
-                      <div className="aspect-square bg-gray-50 w-full rounded-lg flex items-center justify-center mb-3 relative">
+                    <div key={i} className="bg-white p-3 shadow-sm flex flex-col h-full" style={{ borderRadius: '0' }}>
+                      <div className="aspect-square bg-gray-50 w-full flex items-center justify-center mb-3 relative" style={{ borderRadius: '0' }}>
                         <ImageIcon className="opacity-20 text-gray-400" size={32} />
                         {localSettings.showCode && (
-                           <span className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[8px] font-mono rounded-sm shadow-sm text-gray-800">
+                           <span className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[8px] font-mono shadow-sm text-gray-800" style={{ borderRadius: '0' }}>
                              #COD
                            </span>
                         )}
@@ -416,8 +453,19 @@ export function CatalogEditor() {
                   ))}
                 </div>
 
+                {/* Page Footer Decoration */}
+                {localSettings.coverImageBottom && (
+                  <div className="mt-auto pt-4 flex justify-center w-full">
+                    <img 
+                      src={localSettings.coverImageBottom} 
+                      alt="Footer Decoration" 
+                      className="w-1/2 h-auto opacity-90"
+                    />
+                  </div>
+                )}
+
                 {/* Footer */}
-                <div className="mt-auto pt-4 border-t text-center text-xs opacity-60" style={{ borderColor: `${localSettings.primaryColor}30` }}>
+                <div className="text-center text-[10px] opacity-60 mt-2" style={{ color: '#efc26c' }}>
                   {localSettings.footerText || 'Rodapé da Página'}
                 </div>
               </div>

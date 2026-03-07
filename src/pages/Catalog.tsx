@@ -186,26 +186,58 @@ export default function Catalog() {
                   width: '210mm', 
                   minHeight: '297mm',
                   height: '297mm',
-                  backgroundColor: catalogSettings.secondaryColor,
+                  backgroundColor: '#efedec', // Same as cover
                   color: catalogSettings.textColor,
                   padding: '15mm',
                   pageBreakAfter: 'always'
                 }}
               >
+                {/* Top Left Decoration (Reused from Cover) */}
+                {catalogSettings.coverImageTopLeft && (
+                  <img 
+                    src={catalogSettings.coverImageTopLeft} 
+                    alt="Corner Decoration" 
+                    className="absolute top-4 left-4 w-32 h-auto opacity-80"
+                  />
+                )}
+
                 {/* Page Header */}
-                <div className="flex justify-between items-end border-b pb-4 mb-8" style={{ borderColor: `${catalogSettings.primaryColor}30` }}>
-                  <div>
-                    <h2 className="text-3xl font-serif font-bold" style={{ color: catalogSettings.primaryColor }}>
-                      {catalogSettings.headerText || settings.brandName}
-                    </h2>
-                    <p className="text-sm opacity-70 uppercase tracking-wider font-medium mt-1">
-                      {category} {productChunks.length > 1 ? `(${pageIndex + 1}/${productChunks.length})` : ''}
+                <div className="flex justify-between items-start mb-8 relative z-10 mt-4">
+                  <div className="flex flex-col items-start">
+                    {/* Brand Name */}
+                    <h1 
+                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
+                    >
+                      {settings.brandName}
+                    </h1>
+                    {/* Slogan */}
+                    <p 
+                      className="text-lg font-serif tracking-widest mt-0 mb-4"
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
+                    >
+                      {settings.subtitle}
                     </p>
+                    
+                    {/* Category Name */}
+                    <h2 
+                      className="text-2xl font-serif font-bold uppercase tracking-wider" 
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '4px solid #efc26c', paddingLeft: '12px' }}
+                    >
+                      {category} {productChunks.length > 1 ? `(${pageIndex + 1}/${productChunks.length})` : ''}
+                    </h2>
                   </div>
-                  <div className="flex items-center gap-3">
-                     {/* Small Logo in Header */}
+
+                  {/* Logo Top Right */}
+                  <div className="flex items-center justify-center">
                      {(catalogSettings.logo || settings.logo) && (
-                       <img src={catalogSettings.logo || settings.logo!} alt="Logo" className="h-10 w-auto object-contain" />
+                       <div className="p-1 rounded-full border-2 border-[#efc26c] bg-white shadow-sm">
+                         <img 
+                           src={catalogSettings.logo || settings.logo!} 
+                           alt="Logo" 
+                           className="h-24 w-24 object-contain rounded-full" 
+                         />
+                       </div>
                      )}
                   </div>
                 </div>
@@ -221,12 +253,12 @@ export default function Catalog() {
                   {pageProducts.map((product) => (
                     <div key={product.id} className="break-inside-avoid h-full">
                       <div 
-                        className="p-4 rounded-xl shadow-sm h-full flex flex-col"
-                        style={{ backgroundColor: '#ffffff' }}
+                        className="p-4 shadow-sm h-full flex flex-col"
+                        style={{ backgroundColor: '#ffffff', borderRadius: '0' }} // Square corners
                       >
                         <div 
-                          className="aspect-square w-full rounded-lg overflow-hidden mb-3 relative"
-                          style={{ backgroundColor: '#f9fafb' }}
+                          className="aspect-square w-full overflow-hidden mb-3 relative"
+                          style={{ backgroundColor: '#f9fafb', borderRadius: '0' }}
                         >
                           {product.images?.[0] ? (
                             <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
@@ -237,8 +269,8 @@ export default function Catalog() {
                           )}
                           {catalogSettings.showCode && product.code && (
                              <span 
-                               className="absolute top-2 left-2 px-2 py-1 text-[10px] font-mono rounded-sm shadow-sm"
-                               style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#1f2937' }}
+                               className="absolute top-2 left-2 px-2 py-1 text-[10px] font-mono shadow-sm"
+                               style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#1f2937', borderRadius: '0' }}
                              >
                                #{product.code}
                              </span>
@@ -264,10 +296,20 @@ export default function Catalog() {
                   ))}
                 </div>
 
-                {/* Page Footer */}
-                <div className="mt-auto pt-4 border-t text-center text-xs opacity-60 flex justify-between items-center" style={{ borderColor: `${catalogSettings.primaryColor}30` }}>
+                {/* Page Footer Decoration */}
+                {catalogSettings.coverImageBottom && (
+                  <div className="mt-auto pt-4 flex justify-center w-full">
+                    <img 
+                      src={catalogSettings.coverImageBottom} 
+                      alt="Footer Decoration" 
+                      className="w-1/2 h-auto opacity-90"
+                    />
+                  </div>
+                )}
+                
+                {/* Simple Footer Text */}
+                <div className="text-center text-[10px] opacity-60 mt-2" style={{ color: '#efc26c' }}>
                   <span>{catalogSettings.footerText}</span>
-                  <span>{category}</span>
                 </div>
               </div>
             ));
