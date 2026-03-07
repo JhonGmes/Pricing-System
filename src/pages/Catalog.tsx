@@ -44,6 +44,9 @@ export default function Catalog() {
     if (!catalogRef.current) return;
     
     setIsGeneratingPDF(true);
+    // Wait for state update to reflect in DOM
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
       const element = catalogRef.current;
       const opt = {
@@ -89,18 +92,21 @@ export default function Catalog() {
       </div>
 
       {/* Catalog Preview Area */}
-      <div className="bg-gray-200 p-4 md:p-8 rounded-xl overflow-auto print:p-0 print:bg-white print:overflow-visible">
+      <div className={`bg-gray-200 p-4 md:p-8 rounded-xl overflow-auto ${isGeneratingPDF ? 'p-0 bg-white' : ''} print:p-0 print:bg-white print:overflow-visible`}>
         <div ref={catalogRef} className="print:w-full">
           
           {/* COVER PAGE */}
           <div 
-            className="mx-auto shadow-lg print:shadow-none mb-8 print:mb-0 relative overflow-hidden flex flex-col items-center justify-center break-after-page"
+            className={`mx-auto relative overflow-hidden flex flex-col items-center justify-center ${isGeneratingPDF ? '' : 'shadow-lg mb-8'} print:shadow-none print:mb-0`}
             style={{ 
               width: '210mm', 
-              minHeight: '297mm',
-              height: '297mm',
+              minHeight: '296mm',
+              height: '296mm',
               backgroundColor: '#efedec', // New background color
-              color: catalogSettings.primaryColor
+              color: catalogSettings.primaryColor,
+              pageBreakAfter: 'always',
+              margin: 0,
+              padding: 0
             }}
           >
             {/* Top Left Corner Decoration */}
@@ -181,15 +187,16 @@ export default function Catalog() {
             return productChunks.map((pageProducts, pageIndex) => (
               <div 
                 key={`${category}-${pageIndex}`}
-                className="mx-auto shadow-lg print:shadow-none mb-8 print:mb-0 relative overflow-hidden flex flex-col"
+                className={`mx-auto relative overflow-hidden flex flex-col ${isGeneratingPDF ? '' : 'shadow-lg mb-8'} print:shadow-none print:mb-0`}
                 style={{ 
                   width: '210mm', 
-                  minHeight: '297mm',
-                  height: '297mm',
+                  minHeight: '296mm',
+                  height: '296mm',
                   backgroundColor: '#efedec', // Same as cover
                   color: catalogSettings.textColor,
                   padding: '15mm',
-                  pageBreakAfter: 'always'
+                  pageBreakAfter: 'always',
+                  margin: 0
                 }}
               >
                 {/* Top Left Decoration (Reused from Cover) */}

@@ -36,8 +36,6 @@
   /* Reset layout containers for print */
   .min-h-screen, 
   .h-screen, 
-  .flex, 
-  .flex-col, 
   .overflow-hidden,
   .overflow-y-auto {
     display: block !important;
