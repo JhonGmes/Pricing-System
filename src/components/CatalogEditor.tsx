@@ -391,18 +391,18 @@ export function CatalogEditor() {
                 )}
 
                 {/* Page Header */}
-                <div className="flex justify-between items-start mb-6 relative z-10 mt-2">
+                <div className="flex justify-between items-start mb-4 relative z-10 mt-0">
                   <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-4xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
                       {localSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-sm font-serif tracking-widest mt-0 mb-2 pl-1"
+                      className="text-xs font-serif tracking-widest -mt-1 mb-1 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
                       {localSettings.headerSubtitle || settings.subtitle}
@@ -410,7 +410,7 @@ export function CatalogEditor() {
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-lg font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      className="text-sm font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
                       Categoria
@@ -418,39 +418,39 @@ export function CatalogEditor() {
                   </div>
 
                   {/* Logo Top Right */}
-                  <div className="flex items-center justify-center -mt-6 -mr-2">
+                  <div className="flex items-center justify-center -mt-4 -mr-2">
                      {(localSettings.logo || settings.logo) && (
                        <img 
                          src={localSettings.logo || settings.logo!} 
                          alt="Logo" 
-                         className="h-24 w-24 object-contain" 
+                         className="h-20 w-20 object-contain" 
                        />
                      )}
                   </div>
                 </div>
 
                 {/* Grid */}
-                <div className="grid gap-6 flex-1 content-start" style={{ 
+                <div className="grid gap-4 flex-1 content-start" style={{ 
                   gridTemplateColumns: localSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                   alignContent: 'start'
                 }}>
                   {[...Array(localSettings.productsPerPage)].map((_, i) => (
-                    <div key={i} className="bg-white p-3 shadow-sm flex flex-col h-full" style={{ borderRadius: '0' }}>
-                      <div className="aspect-square bg-gray-50 w-full flex items-center justify-center mb-3 relative" style={{ borderRadius: '0' }}>
-                        <ImageIcon className="opacity-20 text-gray-400" size={32} />
+                    <div key={i} className="bg-white p-2 shadow-sm flex flex-col h-full" style={{ borderRadius: '0' }}>
+                      <div className="aspect-square bg-gray-50 w-full flex items-center justify-center mb-2 relative" style={{ borderRadius: '0' }}>
+                        <ImageIcon className="opacity-20 text-gray-400" size={24} />
                         {localSettings.showCode && (
                            <span className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[8px] font-mono shadow-sm text-gray-800" style={{ borderRadius: '0' }}>
                              #COD
                            </span>
                         )}
                       </div>
-                      <div className="text-center mt-auto">
-                        <h3 className="font-serif font-bold text-sm leading-tight text-gray-900">Produto {i+1}</h3>
+                      <div className="text-center mt-auto space-y-0.5">
+                        <h3 className="font-serif font-bold text-xs leading-tight text-gray-900">Produto {i+1}</h3>
                         {localSettings.showDescription && (
-                          <p className="text-[10px] text-gray-500 line-clamp-2 mt-1 px-1">Descrição curta do produto...</p>
+                          <p className="text-[8px] text-gray-500 line-clamp-2 mt-0 px-1 leading-tight">Descrição curta do produto...</p>
                         )}
                         {localSettings.showPrice && (
-                          <p className="font-bold text-sm mt-2 text-indigo-900">R$ 49,90</p>
+                          <p className="font-bold text-xs mt-1 text-indigo-900">R$ 49,90</p>
                         )}
                       </div>
                     </div>

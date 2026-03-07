@@ -202,18 +202,18 @@ export default function Catalog() {
                 )}
 
                 {/* Page Header */}
-                <div className="flex justify-between items-start mb-6 relative z-10 mt-0">
+                <div className="flex justify-between items-start mb-4 relative z-10 mt-0">
                   <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-6xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
                       {catalogSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-xl font-serif tracking-widest mt-0 mb-2 pl-1"
+                      className="text-base font-serif tracking-widest -mt-1 mb-1 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
                       {catalogSettings.headerSubtitle || settings.subtitle}
@@ -221,7 +221,7 @@ export default function Catalog() {
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-xl font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      className="text-lg font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
                       {category} {productChunks.length > 1 ? `(${pageIndex + 1}/${productChunks.length})` : ''}
@@ -229,12 +229,12 @@ export default function Catalog() {
                   </div>
 
                   {/* Logo Top Right */}
-                  <div className="flex items-center justify-center -mt-8 -mr-4">
+                  <div className="flex items-center justify-center -mt-4 -mr-2">
                      {(catalogSettings.logo || settings.logo) && (
                        <img 
                          src={catalogSettings.logo || settings.logo!} 
                          alt="Logo" 
-                         className="h-32 w-32 object-contain" 
+                         className="h-24 w-24 object-contain" 
                        />
                      )}
                   </div>
@@ -242,7 +242,7 @@ export default function Catalog() {
 
                 {/* Products Grid */}
                 <div 
-                  className="grid gap-6 flex-1 content-start" 
+                  className="grid gap-4 flex-1 content-start" 
                   style={{ 
                     gridTemplateColumns: catalogSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                     alignContent: 'start'
@@ -251,40 +251,40 @@ export default function Catalog() {
                   {pageProducts.map((product) => (
                     <div key={product.id} className="break-inside-avoid h-full">
                       <div 
-                        className="p-4 shadow-sm h-full flex flex-col"
+                        className="p-2 shadow-sm h-full flex flex-col"
                         style={{ backgroundColor: '#ffffff', borderRadius: '0' }} // Square corners
                       >
                         <div 
-                          className="aspect-square w-full overflow-hidden mb-3 relative"
+                          className="aspect-square w-full overflow-hidden mb-2 relative"
                           style={{ backgroundColor: '#f9fafb', borderRadius: '0' }}
                         >
                           {product.images?.[0] ? (
                             <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300" style={{ backgroundColor: '#f3f4f6', color: '#d1d5db' }}>
-                              <ImageIcon size={32} />
+                              <ImageIcon size={24} />
                             </div>
                           )}
                           {catalogSettings.showCode && product.code && (
                              <span 
-                               className="absolute top-2 left-2 px-2 py-1 text-[10px] font-mono shadow-sm"
+                               className="absolute top-1 left-1 px-1.5 py-0.5 text-[8px] font-mono shadow-sm"
                                style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#1f2937', borderRadius: '0' }}
                              >
                                #{product.code}
                              </span>
                           )}
                         </div>
-                        <div className="text-center space-y-1 mt-auto">
-                          <h3 className="font-serif font-bold text-lg leading-tight" style={{ color: '#111827' }}>
+                        <div className="text-center space-y-0.5 mt-auto">
+                          <h3 className="font-serif font-bold text-sm leading-tight" style={{ color: '#111827' }}>
                             {product.name}
                           </h3>
                           {catalogSettings.showDescription && (
-                            <p className="text-xs line-clamp-2 px-1" style={{ color: '#6b7280' }}>
+                            <p className="text-[10px] line-clamp-2 px-1 leading-tight" style={{ color: '#6b7280' }}>
                               {product.description}
                             </p>
                           )}
                           {catalogSettings.showPrice && (
-                            <p className="font-bold text-lg mt-2" style={{ color: '#312e81' }}>
+                            <p className="font-bold text-base mt-1" style={{ color: '#312e81' }}>
                               {formatCurrency(product.finalPrice)}
                             </p>
                           )}
