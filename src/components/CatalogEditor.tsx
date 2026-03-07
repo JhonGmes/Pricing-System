@@ -235,29 +235,67 @@ export function CatalogEditor() {
           >
             {activeTab === 'cover' ? (
               // Cover Preview
-              <div className="h-full flex flex-col items-center justify-center p-12 relative">
-                <div className="absolute top-12 right-12">
-                   {/* Optional Icon/Logo placeholder */}
-                   {localSettings.logo || settings.logo ? (
-                     <img src={localSettings.logo || settings.logo!} alt="Logo" className="w-24 h-24 object-contain" />
-                   ) : (
-                     <div className="w-16 h-16 rounded-full border-2 flex items-center justify-center" style={{ borderColor: localSettings.primaryColor }}>
-                        <ImageIcon size={24} />
+              <div className="h-full flex flex-col items-center justify-center p-12 relative overflow-hidden">
+                {/* Top Left Corner Decoration */}
+                <img 
+                  src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/5453880482592750845345719323568856955822/image.png" 
+                  alt="Corner Decoration" 
+                  className="absolute top-8 left-8 w-32 h-auto opacity-80"
+                />
+
+                {/* Top Right Page Curl */}
+                <img 
+                  src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/8540605273735166415410118559092497645166/image.png" 
+                  alt="Page Curl" 
+                  className="absolute top-0 right-0 w-48 h-auto"
+                />
+
+                <div className="flex flex-col items-center justify-center z-10 w-full px-6 mt-8">
+                   {/* Logo in Center */}
+                   <div className="mb-8 relative">
+                     <div className="p-1.5 rounded-full border-4 border-[#efc26c] shadow-xl bg-white">
+                       {localSettings.logo || settings.logo ? (
+                         <img 
+                           src={localSettings.logo || settings.logo!} 
+                           alt="Logo" 
+                           className="w-40 h-40 object-contain rounded-full" 
+                         />
+                       ) : (
+                         <div className="w-40 h-40 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
+                            <span className="font-serif font-bold text-4xl">{settings.brandName.charAt(0)}</span>
+                         </div>
+                       )}
                      </div>
-                   )}
-                </div>
+                   </div>
                 
-                <div className="text-center space-y-6">
-                  <h1 className="text-6xl font-serif font-bold tracking-tight" style={{ color: localSettings.primaryColor }}>
-                    {localSettings.coverTitle || 'Título da Marca'}
-                  </h1>
-                  <p className="text-xl font-light tracking-wide opacity-80">
-                    {localSettings.coverSubtitle || 'Subtítulo do Catálogo'}
-                  </p>
+                   <div className="text-center space-y-3">
+                     <h1 
+                       className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                       style={{ color: '#efc26c', fontFamily: '"Pinyon Script", cursive' }}
+                     >
+                       {localSettings.coverTitle || settings.brandName}
+                     </h1>
+                     <p 
+                       className="text-xl font-serif tracking-widest uppercase"
+                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
+                     >
+                       {localSettings.coverSubtitle || settings.subtitle}
+                     </p>
+                   </div>
                 </div>
 
-                <div className="absolute bottom-12 w-full text-center border-t pt-6 mx-12" style={{ borderColor: `${localSettings.primaryColor}30`, maxWidth: 'calc(100% - 6rem)' }}>
-                  <p className="text-sm font-medium tracking-widest uppercase">
+                {/* Bottom Decoration */}
+                <div className="absolute bottom-12 w-full flex justify-center">
+                  <img 
+                    src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/669865063065d665516999264104085420040798/image.png" 
+                    alt="Divider Decoration" 
+                    className="w-3/4 h-auto opacity-90"
+                  />
+                </div>
+
+                {/* Footer Text */}
+                <div className="absolute bottom-4 w-full text-center text-[10px] opacity-40" style={{ color: '#efc26c' }}>
+                  <p className="font-serif tracking-widest uppercase">
                     {localSettings.coverFooter || 'www.seusite.com.br'}
                   </p>
                 </div>

@@ -97,34 +97,74 @@ export default function Catalog() {
             className="mx-auto shadow-lg print:shadow-none mb-8 print:mb-0 relative overflow-hidden flex flex-col items-center justify-center break-after-page"
             style={{ 
               width: '210mm', 
-              minHeight: '297mm', // Ensure full height
+              minHeight: '297mm',
               height: '297mm',
-              backgroundColor: catalogSettings.secondaryColor,
+              backgroundColor: '#efedec', // New background color
               color: catalogSettings.primaryColor
             }}
           >
-            <div className="absolute top-12 right-12">
-               {/* Logo on Cover */}
-               {catalogSettings.logo || settings.logo ? (
-                 <img src={catalogSettings.logo || settings.logo!} alt="Logo" className="w-24 h-24 object-contain" />
-               ) : (
-                 <div className="w-24 h-24 rounded-full border-2 flex items-center justify-center" style={{ borderColor: catalogSettings.primaryColor }}>
-                    <span className="font-serif font-bold text-2xl">{settings.brandName.charAt(0)}</span>
+            {/* Top Left Corner Decoration */}
+            <img 
+              src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/5453880482592750845345719323568856955822/image.png" 
+              alt="Corner Decoration" 
+              className="absolute top-8 left-8 w-48 h-auto opacity-80"
+            />
+
+            {/* Top Right Page Curl */}
+            <img 
+              src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/8540605273735166415410118559092497645166/image.png" 
+              alt="Page Curl" 
+              className="absolute top-0 right-0 w-64 h-auto"
+            />
+
+            {/* Center Content */}
+            <div className="flex flex-col items-center justify-center z-10 w-full px-12 mt-12">
+               {/* Logo in Center */}
+               <div className="mb-12 relative">
+                 {/* Gold Circle Frame Effect (Simulated with CSS or if user provided one, but I'll use a nice border) */}
+                 <div className="p-2 rounded-full border-4 border-[#efc26c] shadow-xl bg-white">
+                   {catalogSettings.logo || settings.logo ? (
+                     <img 
+                       src={catalogSettings.logo || settings.logo!} 
+                       alt="Logo" 
+                       className="w-64 h-64 object-contain rounded-full" 
+                     />
+                   ) : (
+                     <div className="w-64 h-64 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
+                        <span className="font-serif font-bold text-6xl">{settings.brandName.charAt(0)}</span>
+                     </div>
+                   )}
                  </div>
-               )}
-            </div>
+               </div>
             
-            <div className="text-center space-y-6 z-10 p-12">
-              <h1 className="text-7xl font-serif font-bold tracking-tight leading-tight" style={{ color: catalogSettings.primaryColor }}>
-                {catalogSettings.coverTitle || settings.brandName}
-              </h1>
-              <p className="text-2xl font-light tracking-wide opacity-80">
-                {catalogSettings.coverSubtitle || settings.subtitle}
-              </p>
+               <div className="text-center space-y-4">
+                 <h1 
+                   className="text-7xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                   style={{ color: '#efc26c', fontFamily: '"Pinyon Script", cursive' }}
+                 >
+                   {catalogSettings.coverTitle || settings.brandName}
+                 </h1>
+                 <p 
+                   className="text-3xl font-serif tracking-widest uppercase"
+                   style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
+                 >
+                   {catalogSettings.coverSubtitle || settings.subtitle}
+                 </p>
+               </div>
             </div>
 
-            <div className="absolute bottom-12 w-full text-center border-t pt-6 mx-12" style={{ borderColor: `${catalogSettings.primaryColor}30`, maxWidth: 'calc(100% - 6rem)' }}>
-              <p className="text-sm font-medium tracking-widest uppercase">
+            {/* Bottom Decoration */}
+            <div className="absolute bottom-16 w-full flex justify-center">
+              <img 
+                src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/669865063065d665516999264104085420040798/image.png" 
+                alt="Divider Decoration" 
+                className="w-3/4 h-auto opacity-90"
+              />
+            </div>
+
+            {/* Footer Text (Optional, kept minimal) */}
+            <div className="absolute bottom-6 w-full text-center text-xs opacity-40" style={{ color: '#efc26c' }}>
+              <p className="font-serif tracking-widest uppercase">
                 {catalogSettings.coverFooter || 'www.seusite.com.br'}
               </p>
             </div>
