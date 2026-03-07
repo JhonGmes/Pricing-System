@@ -459,7 +459,7 @@ export function CatalogEditor() {
 
                 {/* Page Footer Decoration */}
                 {localSettings.coverImageBottom && (
-                  <div className="mt-auto pt-4 flex justify-center w-full">
+                  <div className="absolute bottom-12 left-0 w-full flex justify-center pointer-events-none">
                     <img 
                       src={localSettings.coverImageBottom} 
                       alt="Footer Decoration" 
@@ -469,7 +469,7 @@ export function CatalogEditor() {
                 )}
 
                 {/* Footer */}
-                <div className="text-center text-[10px] opacity-60 mt-2" style={{ color: '#efc26c' }}>
+                <div className="absolute bottom-4 left-0 w-full text-center text-[10px] opacity-60" style={{ color: '#efc26c' }}>
                   {localSettings.footerText || 'Rodapé da Página'}
                 </div>
               </div>

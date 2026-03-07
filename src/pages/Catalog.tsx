@@ -97,7 +97,7 @@ export default function Catalog() {
           
           {/* COVER PAGE */}
           <div 
-            className={`mx-auto relative overflow-hidden flex flex-col items-center justify-center ${isGeneratingPDF ? '' : 'shadow-lg mb-8'} print:shadow-none print:mb-0`}
+            className={`mx-auto relative overflow-hidden flex flex-col items-center justify-center ${isGeneratingPDF ? '' : 'shadow-lg mb-12'} print:shadow-none print:mb-0`}
             style={{ 
               width: '210mm', 
               minHeight: '296mm',
@@ -105,7 +105,7 @@ export default function Catalog() {
               backgroundColor: '#efedec', // New background color
               color: catalogSettings.primaryColor,
               pageBreakAfter: 'always',
-              margin: 0,
+              margin: isGeneratingPDF ? 0 : undefined,
               padding: 0
             }}
           >
@@ -187,7 +187,7 @@ export default function Catalog() {
             return productChunks.map((pageProducts, pageIndex) => (
               <div 
                 key={`${category}-${pageIndex}`}
-                className={`mx-auto relative overflow-hidden flex flex-col ${isGeneratingPDF ? '' : 'shadow-lg mb-8'} print:shadow-none print:mb-0`}
+                className={`mx-auto relative overflow-hidden flex flex-col ${isGeneratingPDF ? '' : 'shadow-lg mb-12'} print:shadow-none print:mb-0`}
                 style={{ 
                   width: '210mm', 
                   minHeight: '296mm',
@@ -196,7 +196,7 @@ export default function Catalog() {
                   color: catalogSettings.textColor,
                   padding: '15mm',
                   pageBreakAfter: 'always',
-                  margin: 0
+                  margin: isGeneratingPDF ? 0 : undefined
                 }}
               >
                 {/* Top Left Decoration (Reused from Cover) */}
@@ -249,7 +249,7 @@ export default function Catalog() {
 
                 {/* Products Grid */}
                 <div 
-                  className="grid gap-4 flex-1 content-start" 
+                  className="grid gap-4 flex-1 content-start mb-24" 
                   style={{ 
                     gridTemplateColumns: catalogSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                     alignContent: 'start'
@@ -301,9 +301,9 @@ export default function Catalog() {
                   ))}
                 </div>
 
-                {/* Page Footer Decoration */}
+                {/* Page Footer Decoration - Fixed Bottom */}
                 {catalogSettings.coverImageBottom && (
-                  <div className="mt-auto pt-4 flex justify-center w-full">
+                  <div className="absolute bottom-16 left-0 w-full flex justify-center pointer-events-none">
                     <img 
                       src={catalogSettings.coverImageBottom} 
                       alt="Footer Decoration" 
@@ -312,8 +312,8 @@ export default function Catalog() {
                   </div>
                 )}
                 
-                {/* Simple Footer Text */}
-                <div className="text-center text-[10px] opacity-60 mt-2" style={{ color: '#efc26c' }}>
+                {/* Simple Footer Text - Fixed Bottom */}
+                <div className="absolute bottom-8 left-0 w-full text-center text-[10px] opacity-60" style={{ color: '#efc26c' }}>
                   <span>{catalogSettings.footerText}</span>
                 </div>
               </div>
