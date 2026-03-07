@@ -213,14 +213,14 @@ export default function Catalog() {
                   <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-5xl font-script font-normal tracking-wide leading-normal drop-shadow-sm mb-2" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
                       {catalogSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-base font-serif tracking-widest -mt-1 mb-1 pl-1"
+                      className="text-base font-serif tracking-widest mt-0 mb-3 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
                       {catalogSettings.headerSubtitle || settings.subtitle}
@@ -228,7 +228,7 @@ export default function Catalog() {
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-lg font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      className="text-lg font-serif font-bold uppercase tracking-wider mt-0 pl-1" 
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
                       {category} {productChunks.length > 1 ? `(${pageIndex + 1}/${productChunks.length})` : ''}

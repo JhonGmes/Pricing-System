@@ -395,14 +395,14 @@ export function CatalogEditor() {
                   <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-4xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-4xl font-script font-normal tracking-wide leading-normal drop-shadow-sm mb-2" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
                       {localSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-xs font-serif tracking-widest -mt-1 mb-1 pl-1"
+                      className="text-xs font-serif tracking-widest mt-0 mb-3 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
                       {localSettings.headerSubtitle || settings.subtitle}
@@ -410,7 +410,7 @@ export function CatalogEditor() {
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-sm font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      className="text-sm font-serif font-bold uppercase tracking-wider mt-0 pl-1" 
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
                       Categoria
