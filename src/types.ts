@@ -91,6 +91,9 @@ export interface CatalogSettings {
   showDescription: boolean;
   showCode: boolean;
   logo?: string | null; // Custom logo for catalog
+  coverImageTopLeft?: string | null;
+  coverImageTopRight?: string | null;
+  coverImageBottom?: string | null;
 }
 
 export interface AppSettings {

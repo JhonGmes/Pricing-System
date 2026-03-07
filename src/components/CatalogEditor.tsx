@@ -81,7 +81,7 @@ export function CatalogEditor() {
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 relative group transition-all hover:border-indigo-400 hover:bg-indigo-50">
                       {localSettings.logo ? (
-                        <img src={localSettings.logo} alt="Logo" className="w-full h-full object-cover" />
+                        <img src={localSettings.logo} alt="Logo" className="w-full h-full object-contain" />
                       ) : (
                         <div className="text-center p-1">
                           <Upload size={20} className="text-gray-300 mx-auto" />
@@ -102,6 +102,74 @@ export function CatalogEditor() {
                           Remover logo
                         </button>
                       )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decoration Uploads */}
+                <div className="space-y-3 pt-4 border-t border-gray-100">
+                  <h3 className="text-sm font-medium text-gray-900">Decorações da Capa</h3>
+                  
+                  {/* Top Left */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Canto Superior Esquerdo</label>
+                    <div className="flex items-center gap-2">
+                       <input 
+                         type="file" 
+                         className="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                         accept="image/*"
+                         onChange={async (e) => {
+                           if (e.target.files?.[0]) {
+                             const base64 = await fileToBase64(e.target.files[0]);
+                             handleChange('coverImageTopLeft', base64);
+                           }
+                         }}
+                       />
+                       {localSettings.coverImageTopLeft && (
+                         <button onClick={() => handleChange('coverImageTopLeft', null)} className="text-xs text-red-500">Remover</button>
+                       )}
+                    </div>
+                  </div>
+
+                  {/* Top Right */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Canto Superior Direito</label>
+                    <div className="flex items-center gap-2">
+                       <input 
+                         type="file" 
+                         className="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                         accept="image/*"
+                         onChange={async (e) => {
+                           if (e.target.files?.[0]) {
+                             const base64 = await fileToBase64(e.target.files[0]);
+                             handleChange('coverImageTopRight', base64);
+                           }
+                         }}
+                       />
+                       {localSettings.coverImageTopRight && (
+                         <button onClick={() => handleChange('coverImageTopRight', null)} className="text-xs text-red-500">Remover</button>
+                       )}
+                    </div>
+                  </div>
+
+                  {/* Bottom */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Decoração Inferior</label>
+                    <div className="flex items-center gap-2">
+                       <input 
+                         type="file" 
+                         className="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                         accept="image/*"
+                         onChange={async (e) => {
+                           if (e.target.files?.[0]) {
+                             const base64 = await fileToBase64(e.target.files[0]);
+                             handleChange('coverImageBottom', base64);
+                           }
+                         }}
+                       />
+                       {localSettings.coverImageBottom && (
+                         <button onClick={() => handleChange('coverImageBottom', null)} className="text-xs text-red-500">Remover</button>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -237,46 +305,48 @@ export function CatalogEditor() {
               // Cover Preview
               <div className="h-full flex flex-col items-center justify-center p-12 relative overflow-hidden">
                 {/* Top Left Corner Decoration */}
-                <img 
-                  src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/5453880482592750845345719323568856955822/image.png" 
-                  alt="Corner Decoration" 
-                  className="absolute top-8 left-8 w-32 h-auto opacity-80"
-                />
+                {localSettings.coverImageTopLeft && (
+                  <img 
+                    src={localSettings.coverImageTopLeft} 
+                    alt="Corner Decoration" 
+                    className="absolute top-4 left-4 w-32 h-auto opacity-80"
+                  />
+                )}
 
                 {/* Top Right Page Curl */}
-                <img 
-                  src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/8540605273735166415410118559092497645166/image.png" 
-                  alt="Page Curl" 
-                  className="absolute top-0 right-0 w-48 h-auto"
-                />
+                {localSettings.coverImageTopRight && (
+                  <img 
+                    src={localSettings.coverImageTopRight} 
+                    alt="Page Curl" 
+                    className="absolute top-0 right-0 w-32 h-auto"
+                  />
+                )}
 
                 <div className="flex flex-col items-center justify-center z-10 w-full px-6 mt-8">
-                   {/* Logo in Center */}
-                   <div className="mb-8 relative">
-                     <div className="p-1.5 rounded-full border-4 border-[#efc26c] shadow-xl bg-white">
-                       {localSettings.logo || settings.logo ? (
-                         <img 
-                           src={localSettings.logo || settings.logo!} 
-                           alt="Logo" 
-                           className="w-40 h-40 object-contain rounded-full" 
-                         />
-                       ) : (
-                         <div className="w-40 h-40 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
-                            <span className="font-serif font-bold text-4xl">{settings.brandName.charAt(0)}</span>
-                         </div>
-                       )}
-                     </div>
+                   {/* Logo in Center - No Border */}
+                   <div className="mb-6 relative">
+                     {localSettings.logo || settings.logo ? (
+                       <img 
+                         src={localSettings.logo || settings.logo!} 
+                         alt="Logo" 
+                         className="w-48 h-48 object-contain" 
+                       />
+                     ) : (
+                       <div className="w-40 h-40 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
+                          <span className="font-serif font-bold text-4xl">{settings.brandName.charAt(0)}</span>
+                       </div>
+                     )}
                    </div>
                 
-                   <div className="text-center space-y-3">
+                   <div className="text-center space-y-1">
                      <h1 
-                       className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
-                       style={{ color: '#efc26c', fontFamily: '"Pinyon Script", cursive' }}
+                       className="text-6xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                      >
                        {localSettings.coverTitle || settings.brandName}
                      </h1>
                      <p 
-                       className="text-xl font-serif tracking-widest uppercase"
+                       className="text-lg font-serif tracking-widest mt-0"
                        style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                      >
                        {localSettings.coverSubtitle || settings.subtitle}
@@ -285,13 +355,15 @@ export function CatalogEditor() {
                 </div>
 
                 {/* Bottom Decoration */}
-                <div className="absolute bottom-12 w-full flex justify-center">
-                  <img 
-                    src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/669865063065d665516999264104085420040798/image.png" 
-                    alt="Divider Decoration" 
-                    className="w-3/4 h-auto opacity-90"
-                  />
-                </div>
+                {localSettings.coverImageBottom && (
+                  <div className="absolute bottom-12 w-full flex justify-center">
+                    <img 
+                      src={localSettings.coverImageBottom} 
+                      alt="Divider Decoration" 
+                      className="w-1/2 h-auto opacity-90"
+                    />
+                  </div>
+                )}
 
                 {/* Footer Text */}
                 <div className="absolute bottom-4 w-full text-center text-[10px] opacity-40" style={{ color: '#efc26c' }}>

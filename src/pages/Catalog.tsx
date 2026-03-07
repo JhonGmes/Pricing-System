@@ -104,48 +104,49 @@ export default function Catalog() {
             }}
           >
             {/* Top Left Corner Decoration */}
-            <img 
-              src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/5453880482592750845345719323568856955822/image.png" 
-              alt="Corner Decoration" 
-              className="absolute top-8 left-8 w-48 h-auto opacity-80"
-            />
+            {catalogSettings.coverImageTopLeft && (
+              <img 
+                src={catalogSettings.coverImageTopLeft} 
+                alt="Corner Decoration" 
+                className="absolute top-4 left-4 w-48 h-auto opacity-80"
+              />
+            )}
 
             {/* Top Right Page Curl */}
-            <img 
-              src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/8540605273735166415410118559092497645166/image.png" 
-              alt="Page Curl" 
-              className="absolute top-0 right-0 w-64 h-auto"
-            />
+            {catalogSettings.coverImageTopRight && (
+              <img 
+                src={catalogSettings.coverImageTopRight} 
+                alt="Page Curl" 
+                className="absolute top-0 right-0 w-48 h-auto"
+              />
+            )}
 
             {/* Center Content */}
             <div className="flex flex-col items-center justify-center z-10 w-full px-12 mt-12">
-               {/* Logo in Center */}
-               <div className="mb-12 relative">
-                 {/* Gold Circle Frame Effect (Simulated with CSS or if user provided one, but I'll use a nice border) */}
-                 <div className="p-2 rounded-full border-4 border-[#efc26c] shadow-xl bg-white">
-                   {catalogSettings.logo || settings.logo ? (
-                     <img 
-                       src={catalogSettings.logo || settings.logo!} 
-                       alt="Logo" 
-                       className="w-64 h-64 object-contain rounded-full" 
-                     />
-                   ) : (
-                     <div className="w-64 h-64 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
-                        <span className="font-serif font-bold text-6xl">{settings.brandName.charAt(0)}</span>
-                     </div>
-                   )}
-                 </div>
+               {/* Logo in Center - No Border */}
+               <div className="mb-8 relative">
+                 {catalogSettings.logo || settings.logo ? (
+                   <img 
+                     src={catalogSettings.logo || settings.logo!} 
+                     alt="Logo" 
+                     className="w-64 h-64 object-contain" 
+                   />
+                 ) : (
+                   <div className="w-64 h-64 rounded-full bg-gray-100 flex items-center justify-center text-[#efc26c]">
+                      <span className="font-serif font-bold text-6xl">{settings.brandName.charAt(0)}</span>
+                   </div>
+                 )}
                </div>
             
-               <div className="text-center space-y-4">
+               <div className="text-center space-y-1">
                  <h1 
-                   className="text-7xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
-                   style={{ color: '#efc26c', fontFamily: '"Pinyon Script", cursive' }}
+                   className="text-8xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                   style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                  >
                    {catalogSettings.coverTitle || settings.brandName}
                  </h1>
                  <p 
-                   className="text-3xl font-serif tracking-widest uppercase"
+                   className="text-2xl font-serif tracking-widest mt-0"
                    style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                  >
                    {catalogSettings.coverSubtitle || settings.subtitle}
@@ -154,13 +155,15 @@ export default function Catalog() {
             </div>
 
             {/* Bottom Decoration */}
-            <div className="absolute bottom-16 w-full flex justify-center">
-              <img 
-                src="https://multimodal-storage-prod.s3.amazonaws.com/gradio_api/669865063065d665516999264104085420040798/image.png" 
-                alt="Divider Decoration" 
-                className="w-3/4 h-auto opacity-90"
-              />
-            </div>
+            {catalogSettings.coverImageBottom && (
+              <div className="absolute bottom-16 w-full flex justify-center">
+                <img 
+                  src={catalogSettings.coverImageBottom} 
+                  alt="Divider Decoration" 
+                  className="w-1/2 h-auto opacity-90"
+                />
+              </div>
+            )}
 
             {/* Footer Text (Optional, kept minimal) */}
             <div className="absolute bottom-6 w-full text-center text-xs opacity-40" style={{ color: '#efc26c' }}>
