@@ -198,10 +198,16 @@ export function CatalogEditor() {
             {activeTab === 'pages' && (
               <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
                 <Input
-                  label="Texto do Cabeçalho"
+                  label="Texto do Cabeçalho (Marca)"
                   value={localSettings.headerText}
                   onChange={(e) => handleChange('headerText', e.target.value)}
                   placeholder="Ex: Nome da Marca"
+                />
+                <Input
+                  label="Subtítulo do Cabeçalho (Slogan)"
+                  value={localSettings.headerSubtitle || ''}
+                  onChange={(e) => handleChange('headerSubtitle', e.target.value)}
+                  placeholder="Ex: Artigos Religiosos"
                 />
                 <Input
                   label="Texto do Rodapé"
@@ -385,42 +391,40 @@ export function CatalogEditor() {
                 )}
 
                 {/* Page Header */}
-                <div className="flex justify-between items-start mb-8 relative z-10 mt-4">
-                  <div className="flex flex-col items-start">
+                <div className="flex justify-between items-start mb-6 relative z-10 mt-2">
+                  <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-4xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
-                      {settings.brandName}
+                      {localSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-sm font-serif tracking-widest mt-0 mb-4"
+                      className="text-sm font-serif tracking-widest mt-0 mb-2 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
-                      {settings.subtitle}
+                      {localSettings.headerSubtitle || settings.subtitle}
                     </p>
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-xl font-serif font-bold uppercase tracking-wider" 
-                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '4px solid #efc26c', paddingLeft: '12px' }}
+                      className="text-lg font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
-                      {localSettings.headerText || 'Categoria'}
+                      Categoria
                     </h2>
                   </div>
 
                   {/* Logo Top Right */}
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center -mt-6 -mr-2">
                      {(localSettings.logo || settings.logo) && (
-                       <div className="p-1 rounded-full border-2 border-[#efc26c] bg-white shadow-sm">
-                         <img 
-                           src={localSettings.logo || settings.logo!} 
-                           alt="Logo" 
-                           className="h-20 w-20 object-contain rounded-full" 
-                         />
-                       </div>
+                       <img 
+                         src={localSettings.logo || settings.logo!} 
+                         alt="Logo" 
+                         className="h-24 w-24 object-contain" 
+                       />
                      )}
                   </div>
                 </div>

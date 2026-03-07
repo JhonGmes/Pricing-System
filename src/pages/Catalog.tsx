@@ -202,42 +202,40 @@ export default function Catalog() {
                 )}
 
                 {/* Page Header */}
-                <div className="flex justify-between items-start mb-8 relative z-10 mt-4">
-                  <div className="flex flex-col items-start">
+                <div className="flex justify-between items-start mb-6 relative z-10 mt-0">
+                  <div className="flex flex-col items-start -ml-2">
                     {/* Brand Name */}
                     <h1 
-                      className="text-5xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
+                      className="text-6xl font-script font-normal tracking-wide leading-tight drop-shadow-sm" 
                       style={{ color: '#efc26c', fontFamily: '"Great Vibes", cursive' }}
                     >
-                      {settings.brandName}
+                      {catalogSettings.headerText || settings.brandName}
                     </h1>
                     {/* Slogan */}
                     <p 
-                      className="text-lg font-serif tracking-widest mt-0 mb-4"
+                      className="text-xl font-serif tracking-widest mt-0 mb-2 pl-1"
                       style={{ color: '#efc26c', fontFamily: '"Alice", serif' }}
                     >
-                      {settings.subtitle}
+                      {catalogSettings.headerSubtitle || settings.subtitle}
                     </p>
                     
                     {/* Category Name */}
                     <h2 
-                      className="text-2xl font-serif font-bold uppercase tracking-wider" 
-                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '4px solid #efc26c', paddingLeft: '12px' }}
+                      className="text-xl font-serif font-bold uppercase tracking-wider mt-1 pl-1" 
+                      style={{ color: '#efc26c', fontFamily: '"Alice", serif', borderLeft: '3px solid #efc26c', paddingLeft: '10px' }}
                     >
                       {category} {productChunks.length > 1 ? `(${pageIndex + 1}/${productChunks.length})` : ''}
                     </h2>
                   </div>
 
                   {/* Logo Top Right */}
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center -mt-8 -mr-4">
                      {(catalogSettings.logo || settings.logo) && (
-                       <div className="p-1 rounded-full border-2 border-[#efc26c] bg-white shadow-sm">
-                         <img 
-                           src={catalogSettings.logo || settings.logo!} 
-                           alt="Logo" 
-                           className="h-24 w-24 object-contain rounded-full" 
-                         />
-                       </div>
+                       <img 
+                         src={catalogSettings.logo || settings.logo!} 
+                         alt="Logo" 
+                         className="h-32 w-32 object-contain" 
+                       />
                      )}
                   </div>
                 </div>

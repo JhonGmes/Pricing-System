@@ -82,6 +82,7 @@ export interface CatalogSettings {
   coverSubtitle: string;
   coverFooter: string;
   headerText: string;
+  headerSubtitle?: string;
   footerText: string;
   primaryColor: string; // For headers, accents (e.g., #3e1c1c)
   secondaryColor: string; // For backgrounds (e.g., #F5F2ED)
