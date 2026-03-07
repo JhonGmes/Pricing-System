@@ -249,7 +249,7 @@ export default function Catalog() {
 
                 {/* Products Grid */}
                 <div 
-                  className="grid gap-4 flex-1 content-start mb-24" 
+                  className="grid gap-4 flex-1 content-start mb-8" 
                   style={{ 
                     gridTemplateColumns: catalogSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                     alignContent: 'start'
@@ -299,22 +299,6 @@ export default function Catalog() {
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* Page Footer Decoration - Fixed Bottom */}
-                {catalogSettings.coverImageBottom && (
-                  <div className="absolute bottom-16 left-0 w-full flex justify-center pointer-events-none">
-                    <img 
-                      src={catalogSettings.coverImageBottom} 
-                      alt="Footer Decoration" 
-                      className="w-1/2 h-auto opacity-90"
-                    />
-                  </div>
-                )}
-                
-                {/* Simple Footer Text - Fixed Bottom */}
-                <div className="absolute bottom-8 left-0 w-full text-center text-[10px] opacity-60" style={{ color: '#efc26c' }}>
-                  <span>{catalogSettings.footerText}</span>
                 </div>
               </div>
             ));

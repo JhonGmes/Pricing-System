@@ -430,7 +430,7 @@ export function CatalogEditor() {
                 </div>
 
                 {/* Grid */}
-                <div className="grid gap-4 flex-1 content-start" style={{ 
+                <div className="grid gap-4 flex-1 content-start mb-4" style={{ 
                   gridTemplateColumns: localSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                   alignContent: 'start'
                 }}>
@@ -455,22 +455,6 @@ export function CatalogEditor() {
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* Page Footer Decoration */}
-                {localSettings.coverImageBottom && (
-                  <div className="absolute bottom-12 left-0 w-full flex justify-center pointer-events-none">
-                    <img 
-                      src={localSettings.coverImageBottom} 
-                      alt="Footer Decoration" 
-                      className="w-1/2 h-auto opacity-90"
-                    />
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div className="absolute bottom-4 left-0 w-full text-center text-[10px] opacity-60" style={{ color: '#efc26c' }}>
-                  {localSettings.footerText || 'Rodapé da Página'}
                 </div>
               </div>
             )}
