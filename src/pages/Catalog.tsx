@@ -250,9 +250,9 @@ export default function Catalog() {
 
                 {/* Products Grid */}
                 <div 
-                  className="grid gap-4 flex-1 content-start mb-8" 
+                  className="grid gap-x-4 gap-y-2 flex-1 content-start mb-8" 
                   style={{ 
-                    gridTemplateColumns: catalogSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+                    gridTemplateColumns: catalogSettings.productsPerPage > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                     alignContent: 'start'
                   }}
                 >

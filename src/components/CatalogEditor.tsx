@@ -477,8 +477,8 @@ export function CatalogEditor() {
                 </div>
 
                 {/* Grid */}
-                <div className="grid gap-4 flex-1 content-start mb-4" style={{ 
-                  gridTemplateColumns: localSettings.productsPerPage > 6 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+                <div className="grid gap-x-4 gap-y-2 flex-1 content-start mb-4" style={{ 
+                  gridTemplateColumns: localSettings.productsPerPage > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
                   alignContent: 'start'
                 }}>
                   {[...Array(localSettings.productsPerPage)].map((_, i) => (
