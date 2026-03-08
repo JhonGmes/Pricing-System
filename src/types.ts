@@ -95,6 +95,7 @@ export interface CatalogSettings {
   coverImageTopLeft?: string | null;
   coverImageTopRight?: string | null;
   coverImageBottom?: string | null;
+  contentBackgroundImage?: string | null;
 }
 
 export interface AppSettings {

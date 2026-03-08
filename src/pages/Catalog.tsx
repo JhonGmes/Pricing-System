@@ -187,12 +187,13 @@ export default function Catalog() {
             return productChunks.map((pageProducts, pageIndex) => (
               <div 
                 key={`${category}-${pageIndex}`}
-                className={`mx-auto relative overflow-hidden flex flex-col ${isGeneratingPDF ? '' : 'shadow-lg mb-12'} print:shadow-none print:mb-0`}
+                className={`mx-auto relative overflow-hidden flex flex-col ${isGeneratingPDF ? '' : 'shadow-lg mb-12'} print:shadow-none print:mb-0 bg-cover bg-center bg-no-repeat`}
                 style={{ 
                   width: '210mm', 
                   minHeight: '296mm',
                   height: '296mm',
-                  backgroundColor: '#efedec', // Same as cover
+                  backgroundColor: catalogSettings.contentBackgroundImage ? 'transparent' : '#ffffff',
+                  backgroundImage: catalogSettings.contentBackgroundImage ? `url(${catalogSettings.contentBackgroundImage})` : 'none',
                   color: catalogSettings.textColor,
                   padding: '15mm',
                   pageBreakAfter: 'always',
@@ -257,18 +258,12 @@ export default function Catalog() {
                 >
                   {pageProducts.map((product) => (
                     <div key={product.id} className="break-inside-avoid h-full">
-                      <div 
-                        className="p-2 shadow-sm h-full flex flex-col"
-                        style={{ backgroundColor: '#ffffff', borderRadius: '0' }} // Square corners
-                      >
-                        <div 
-                          className="aspect-square w-full overflow-hidden mb-2 relative"
-                          style={{ backgroundColor: '#f9fafb', borderRadius: '0' }}
-                        >
+                      <div className="h-full flex flex-col items-center">
+                        <div className="aspect-square w-full overflow-hidden mb-2 relative bg-transparent">
                           {product.images?.[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300" style={{ backgroundColor: '#f3f4f6', color: '#d1d5db' }}>
+                            <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50/50 rounded-lg border border-dashed border-gray-200">
                               <ImageIcon size={24} />
                             </div>
                           )}
@@ -281,7 +276,7 @@ export default function Catalog() {
                              </span>
                           )}
                         </div>
-                        <div className="text-center space-y-0.5 mt-auto">
+                        <div className="text-center space-y-0.5 mt-auto w-full">
                           <h3 className="font-serif font-bold text-sm leading-tight" style={{ color: '#111827' }}>
                             {product.name}
                           </h3>

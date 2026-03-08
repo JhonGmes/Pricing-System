@@ -197,6 +197,47 @@ export function CatalogEditor() {
 
             {activeTab === 'pages' && (
               <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                {/* Content Page Background */}
+                <div className="pt-4 border-t border-gray-100">
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Imagem de Fundo (Páginas)</label>
+                   <div className="flex items-center gap-4">
+                     <div className="w-16 h-16 rounded border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 relative group transition-all hover:border-indigo-400 hover:bg-indigo-50">
+                       {localSettings.contentBackgroundImage ? (
+                         <img src={localSettings.contentBackgroundImage} alt="Background" className="w-full h-full object-cover" />
+                       ) : (
+                         <div className="text-center p-1">
+                           <ImageIcon size={20} className="text-gray-300 mx-auto" />
+                         </div>
+                       )}
+                       <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white backdrop-blur-sm">
+                         <Upload size={16} />
+                         <input 
+                           type="file" 
+                           className="hidden" 
+                           accept="image/*" 
+                           onChange={async (e) => {
+                             if (e.target.files?.[0]) {
+                               const base64 = await fileToBase64(e.target.files[0]);
+                               handleChange('contentBackgroundImage', base64);
+                             }
+                           }} 
+                         />
+                       </label>
+                     </div>
+                     <div className="text-xs text-gray-500 flex-1">
+                       <p>Imagem que preenche todo o fundo das páginas de produtos.</p>
+                       {localSettings.contentBackgroundImage && (
+                         <button 
+                           onClick={() => handleChange('contentBackgroundImage', null)}
+                           className="text-red-500 hover:text-red-700 mt-1 underline"
+                         >
+                           Remover imagem
+                         </button>
+                       )}
+                     </div>
+                   </div>
+                </div>
+
                 <Input
                   label="Texto do Cabeçalho (Marca)"
                   value={localSettings.headerText}
@@ -380,7 +421,13 @@ export function CatalogEditor() {
               </div>
             ) : (
               // Page Preview
-              <div className="h-full flex flex-col p-12 relative" style={{ backgroundColor: '#efedec' }}>
+              <div 
+                className="h-full flex flex-col p-12 relative bg-cover bg-center bg-no-repeat" 
+                style={{ 
+                  backgroundColor: localSettings.contentBackgroundImage ? 'transparent' : '#ffffff',
+                  backgroundImage: localSettings.contentBackgroundImage ? `url(${localSettings.contentBackgroundImage})` : 'none'
+                }}
+              >
                 {/* Top Left Decoration (Reused from Cover) */}
                 {localSettings.coverImageTopLeft && (
                   <img 
@@ -435,16 +482,18 @@ export function CatalogEditor() {
                   alignContent: 'start'
                 }}>
                   {[...Array(localSettings.productsPerPage)].map((_, i) => (
-                    <div key={i} className="bg-white p-2 shadow-sm flex flex-col h-full" style={{ borderRadius: '0' }}>
-                      <div className="aspect-square bg-gray-50 w-full flex items-center justify-center mb-2 relative" style={{ borderRadius: '0' }}>
-                        <ImageIcon className="opacity-20 text-gray-400" size={24} />
+                    <div key={i} className="flex flex-col h-full items-center">
+                      <div className="aspect-square w-full flex items-center justify-center mb-2 relative bg-transparent">
+                        <div className="w-full h-full bg-gray-50/50 flex items-center justify-center rounded-lg border border-dashed border-gray-200">
+                           <ImageIcon className="opacity-20 text-gray-400" size={24} />
+                        </div>
                         {localSettings.showCode && (
                            <span className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[8px] font-mono shadow-sm text-gray-800" style={{ borderRadius: '0' }}>
                              #COD
                            </span>
                         )}
                       </div>
-                      <div className="text-center mt-auto space-y-0.5">
+                      <div className="text-center mt-auto space-y-0.5 w-full">
                         <h3 className="font-serif font-bold text-xs leading-tight text-gray-900">Produto {i+1}</h3>
                         {localSettings.showDescription && (
                           <p className="text-[8px] text-gray-500 line-clamp-2 mt-0 px-1 leading-tight">Descrição curta do produto...</p>
